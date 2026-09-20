@@ -1,0 +1,4 @@
+# Ce qui ne part PAS dans le classeur (clasp push envoie tout le dossier).
+# Les tests tournent sur cette machine avec Node, Apps Script n'en a que faire.
+tests/**
+**/node_modules/**

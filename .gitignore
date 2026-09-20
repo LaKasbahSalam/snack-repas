@@ -1,0 +1,10 @@
+# Dépendances des tests (réinstallables : npm install)
+node_modules/
+
+# Journaux et fichiers temporaires
+*.log
+.DS_Store
+Thumbs.db
+
+# Raccourcis Windows
+*.lnk
