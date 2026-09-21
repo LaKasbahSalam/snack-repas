@@ -21,12 +21,14 @@ const verifier = (condition, titre, vu) => {
 };
 
 const VENTES = [
-  { id: 2, date_vente: "2026-09-20", description: "Panini kefta + frites (ketchup) x 2 - Alice - vendu par momo", montant: 100 },
-  { id: 3, date_vente: "2026-09-20", description: "Coca / Hawai x 3 - Passant - vendu par momo", montant: 36 },
+  { id: 2, date_vente: "2026-09-20", description: "Panini kefta + frites (ketchup) x 2 - Alice - vendu par momo", montant: 100,
+    client: "Alice", vendeur: "momo", part_vendeur: 33.34, part_hotel: 66.66 },
+  { id: 3, date_vente: "2026-09-20", description: "Coca / Hawai x 3 - Passant - vendu par momo", montant: 36,
+    client: "Passant", vendeur: "momo", part_vendeur: 0, part_hotel: 36 },
 ];
 
 /** Fait tourner un tirage et rend ce qui s'est passé. */
-function tirer({ ventes = VENTES, journal = grilleVide(10, 6), accuseEchoue = false } = {}) {
+function tirer({ ventes = VENTES, journal = grilleVide(10, 10), accuseEchoue = false } = {}) {
   const feuille = new FausseFeuille(journal);
   const { ctx, appels } = fauxContexte({ "Journal Snack": feuille }, (corps) => {
     if (corps.action === "ventes") {
@@ -58,15 +60,27 @@ verifier(r.formules[2] === "=D2" && r.formules[3] === "=N(E2)+D3",
 verifier(JSON.stringify(r.appels[1]) === JSON.stringify({ action: "ventes_ack", ids: [2, 3] }),
   "accusé de réception sur les deux ventes", JSON.stringify(r.appels[1]));
 
+verifier(r.grille[0].slice(5, 9).join("|") === "Client|Vendeur|Part vendeur|Part hotel",
+  "en-têtes F à I sur un onglet vierge", r.grille[0].join(" | "));
+verifier(r.grille[1][5] === "Alice" && r.grille[1][6] === "momo"
+  && r.grille[1][7] === 33.34 && r.grille[1][8] === 66.66,
+  "client, vendeur, part vendeur, part hôtel en F à I", r.grille[1].join(" | "));
+verifier(r.grille[2][7] === 0 && r.grille[2][8] === 36,
+  "prime nulle écrite 0, pas vide", r.grille[2].join(" | "));
 // 2. Une vente déjà dans l'onglet : pas de doublon même si un accusé s'est perdu.
-const dejaLa = grilleVide(10, 6);
-dejaLa[0] = ["Id", "Date", "Description", "Montant", "Montant total cumule", ""];
-dejaLa[1] = [2, new Date(2026, 8, 20, 12), "déjà écrite à la main", 100, 100, ""];
+const dejaLa = grilleVide(10, 10);
+dejaLa[0] = ["Id", "Date", "Description", "Montant", "Montant total cumule", "", "", "", "", ""];
+dejaLa[1] = [2, new Date(2026, 8, 20, 12), "déjà écrite à la main", 100, 100, "", "", "", "", ""];
 r = tirer({ journal: dejaLa });
 verifier(r.ecrites === 1, "vente déjà présente non réécrite, la nouvelle oui", r.ecrites);
 verifier(r.grille[2][0] === 3, "la nouvelle s'ajoute en bas", r.grille[2].join(" | "));
 verifier(r.formules[3] === "=N(E2)+D3", "le cumul reprend la ligne du dessus", JSON.stringify(r.formules));
 
+verifier(r.grille[0].slice(5, 9).join("|") === "Client|Vendeur|Part vendeur|Part hotel"
+  && r.grille[0][0] === "Id" && r.grille[0][4] === "Montant total cumule",
+  "onglet d'avant le 21/09 : en-têtes F à I ajoutées, A à E intactes", r.grille[0].join(" | "));
+verifier(r.grille[1][2] === "déjà écrite à la main" && r.grille[1][5] === "",
+  "ligne existante jamais touchée", r.grille[1].join(" | "));
 // 3. L'accusé échoue : les lignes restent écrites, rien n'est perdu.
 r = tirer({ accuseEchoue: true });
 verifier(r.grille[1][0] === 2 && r.grille[2][0] === 3,
@@ -74,6 +88,12 @@ verifier(r.grille[1][0] === 2 && r.grille[2][0] === 3,
 verifier(r.ecrites === 0,
   "accusé en panne : annoncé comme 0 écrite, les ventes repartiront au prochain passage", r.ecrites);
 
+// 3 bis. Base pas encore migrée : ni client, ni vendeur, ni parts.
+r = tirer({ ventes: [{ id: 7, date_vente: "2026-09-21", description: "Coca - Passant - vendu par momo", montant: 12 }] });
+verifier(r.ecrites === 1 && r.grille[1][3] === 12,
+  "ancienne réponse de la base : la vente s'écrit quand même", r.grille[1].join(" | "));
+verifier(r.grille[1].slice(5, 9).every((v) => v === ""),
+  "et F à I restent vides, sans 0 inventé", r.grille[1].join(" | "));
 // 4. Rien à écrire : aucun accusé inutile.
 r = tirer({ ventes: [] });
 verifier(r.ecrites === 0 && r.appels.length === 1,

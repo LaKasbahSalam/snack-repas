@@ -6,6 +6,14 @@
  *   C Description           ce qui a été vendu, à qui, par qui
  *   D Montant               total vendu, prime du vendeur comprise
  *   E Montant total cumulé  formule, cumul de la colonne D
+ *   F Client                à qui (nom de la fiche, ou « pas dans la liste »)
+ *   G Vendeur               pseudo de qui a vendu
+ *   H Part vendeur          sa prime
+ *   I Part hôtel            le reste : D = H + I
+ *
+ * F à I depuis le 21/09/2026, à la fin pour ne rien déplacer. Tant que la
+ * base ne les envoie pas (migration 20260921200000 pas encore passée),
+ * elles restent vides : le script ne casse pas.
  *
  * Le sens est un TIRAGE, comme pour la caisse du classeur Exercices :
  * c'est ce script qui demande les ventes à l'appli, les écrit, puis
@@ -25,7 +33,8 @@
  */
 
 const FEUILLE_JOURNAL = 'Journal Snack';
-const ENTETES_JOURNAL = ['Id', 'Date', 'Description', 'Montant', 'Montant total cumule'];
+const ENTETES_JOURNAL = ['Id', 'Date', 'Description', 'Montant', 'Montant total cumule',
+  'Client', 'Vendeur', 'Part vendeur', 'Part hotel'];
 
 /**
  * Va chercher les ventes et les écrit. Rend le nombre de lignes ajoutées.
@@ -40,11 +49,15 @@ function tirerVentesSnack_(secret) {
     const ventes = demanderVentes_(secret);
     if (ventes.length === 0) return 0;
 
-    // Ligne d'en-tête si l'onglet est vierge.
+    // Ligne d'en-tête si l'onglet est vierge ; sur un onglet d'avant le
+    // 21/09, seules les en-têtes manquantes (F à I) sont posées.
     if (j.getLastRow() === 0) {
       j.getRange(1, 1, 1, ENTETES_JOURNAL.length).setValues([ENTETES_JOURNAL])
         .setFontWeight('bold').setBackground('#efefef');
       j.setFrozenRows(1);
+    } else if (j.getRange(1, 6).getValue() === '') {
+      j.getRange(1, 6, 1, ENTETES_JOURNAL.length - 5).setValues([ENTETES_JOURNAL.slice(5)])
+        .setFontWeight('bold').setBackground('#efefef');
     }
 
     // Ce que l'onglet a déjà, pour ne rien écrire deux fois même si un
@@ -77,6 +90,16 @@ function tirerVentesSnack_(secret) {
       return [r === 2 ? `=D${r}` : `=N(E${r - 1})+D${r}`];
     }));
     j.getRange(depart, 5, aEcrire.length, 1).setNumberFormat('0.00');
+
+    // F à I : qui, et le partage. Vides si la base ne les envoie pas encore.
+    const nombre = (x) => (x === undefined || x === null || x === '' ? '' : Number(x) || 0);
+    j.getRange(depart, 6, aEcrire.length, 4).setValues(aEcrire.map((v) => [
+      String(v.client || '').slice(0, 200),
+      String(v.vendeur || '').slice(0, 50),
+      nombre(v.part_vendeur),
+      nombre(v.part_hotel),
+    ]));
+    j.getRange(depart, 8, aEcrire.length, 2).setNumberFormat('0.00');
 
     // Écrit pour de bon avant d'accuser réception : si le script s'arrête
     // ici (temps dépassé), les lignes sont dans l'onglet et l'accusé
