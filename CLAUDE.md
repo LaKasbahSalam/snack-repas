@@ -13,6 +13,7 @@ moitié est l'application, dans le dépôt **KasbahCalendar** (voir son
 | La carte imprimée, les visuels, les exports | `Snacks and Drinks.dc.html`, `images/`, `*.pdf` |
 | Une copie du classeur | `Fiche repas.xlsx` — copie figée, le classeur vivant est sur Google Drive |
 | Les tâches | `TASKS.md` |
+| Le classeur Gestion de stock et son script | `stock/` — un autre classeur, son propre `.clasp.json` ; tests : `node tests/stock.test.js` |
 
 ## Le script tourne chez Google, pas ici
 
@@ -40,6 +41,7 @@ que faire, et ces fichiers utiliseraient inutilement son quota.
 cd script
 node tests/carte.test.js      # ce que lireCarte_() envoie à l'appli
 node tests/journal.test.js    # ce que tirerVentesSnack_() écrit dans le journal
+node tests/envoi.test.js      # les boissons proposées à l'équipe, et ce qui les bloque
 ```
 
 `tests/faux-sheets.js` est un faux Google Sheets : une grille de valeurs et
@@ -56,7 +58,9 @@ push.
 
 Tout passe par une seule Edge Function, `import-prix-snack` :
 
-- **Le classeur envoie** les prix coûtants des ingrédients, et la carte de
+- **Le classeur envoie** les prix coûtants des ingrédients, le prix équipe des
+  boissons (colonne « Prix équipe » de l'onglet « Boissons », 6 DH par défaut :
+  une boisson n'est pas cédée à son prix d'achat), et la carte de
   vente (onglet « Carte appli ») avec le prix de revient et la **retenue** de
   chaque article — c'est elle qui décide de la prime du vendeur : 5 DH par
   défaut, 1 DH sur les boissons.
