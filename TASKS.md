@@ -1,6 +1,7 @@
 # Lancement du Snack
 
 ## À venir
+- [ ] Reporter dans le classeur Gestion de stock les formats et prix notés dans la liste de courses (Claude peut les relire dans la base de l'artefact)
 - [ ] **Comptage des stocks** — suivre ce qui est acheté, vendu et consommé par l'équipe (les achats équipe sont déjà marqués `origine = 'equipe'` dans l'appli pour pouvoir les isoler)
 
 ## En cours
@@ -10,6 +11,7 @@
 - [ ] Proposer les boissons à l'équipe à 6 DH : onglet « Boissons », sélectionner les lignes, menu Snack → « Ajouter à la page Snack de l'équipe » (le script pose le code et le prix équipe)
 
 ## Fait
+- [x] Liste de courses sur téléphone (artefact claude.ai, photos, format et prix par article), tirée du classeur Gestion de stock — `courses/` — 23/09/2026
 - [x] Photos Pom's et Hawai dans l'appli (page Vente et page Équipe) — KasbahCalendar, `SnackImage.tsx`, non commité — 22/09/2026
 - [x] Boissons : prix équipe (6 DH par défaut, au lieu du prix d'achat) envoyé à l'appli via la colonne « Prix équipe » de l'onglet Boissons — 22/09/2026
 - [x] Fiche technique des quatre outils écrite (`docs/FICHE-TECHNIQUE.md`) — 22/09/2026

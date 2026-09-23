@@ -1,0 +1,283 @@
+<title>Courses de la Kasbah</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Sora:wght@600;700&display=swap">
+<style>
+:root{
+  --ground:#EEF2EE; --surface:#FFFFFF; --ink:#18241F; --muted:#5B6B64; --line:#D5DED8;
+  --accent:#1F6F5C; --accent-ink:#FFFFFF; --accent-soft:#DCEFE7;
+  --cart:#F2B632; --cart-soft:#FFF4D6; --warn:#B4441F;
+  --display:"Sora",system-ui,sans-serif; --body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --ground:#0F1613; --surface:#18221D; --ink:#E4ECE7; --muted:#9AADA4; --line:#2B3833;
+    --accent:#4FBF9C; --accent-ink:#0B1411; --accent-soft:#1E3A31;
+    --cart:#F2B632; --cart-soft:#3A2F12; --warn:#F08A63;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ground:#0F1613; --surface:#18221D; --ink:#E4ECE7; --muted:#9AADA4; --line:#2B3833;
+  --accent:#4FBF9C; --accent-ink:#0B1411; --accent-soft:#1E3A31;
+  --cart:#F2B632; --cart-soft:#3A2F12; --warn:#F08A63;
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.4;padding-inline:16px;padding-bottom:96px}
+.wrap{max-width:1100px;margin:0 auto}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--ground);padding-block:12px 10px;margin-inline:-16px;padding-inline:16px;border-bottom:1px solid var(--line)}
+.row1{display:flex;align-items:center;gap:10px;max-width:1100px;margin:0 auto}
+h1{font-family:var(--display);font-size:1.25rem;margin:0;flex:1;letter-spacing:-.01em}
+.sync{font-size:.8rem;color:var(--muted);white-space:nowrap}
+.sync.off{color:var(--warn)}
+.search{max-width:1100px;margin:10px auto 0;position:relative}
+.search input{width:100%;font:inherit;font-size:1.1rem;padding:12px 44px 12px 14px;border-radius:12px;border:2px solid var(--line);background:var(--surface);color:var(--ink)}
+.search input:focus{outline:none;border-color:var(--accent)}
+.search button{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:none;color:var(--muted);font-size:1.4rem;width:36px;height:36px;cursor:pointer}
+.chips{display:flex;gap:8px;overflow-x:auto;max-width:1100px;margin:10px auto 0;padding-bottom:2px;scrollbar-width:none}
+.chip{flex:none;font:inherit;font-size:.95rem;font-weight:700;padding:8px 14px;border-radius:999px;border:2px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.chip.todo[aria-pressed="true"]{background:var(--cart);border-color:var(--cart);color:#2A1E00}
+section.rayon{margin-top:22px}
+section.rayon h2{font-family:var(--display);font-size:1.05rem;margin:0 0 10px;display:flex;align-items:baseline;gap:8px}
+section.rayon h2 small{font-family:var(--body);font-weight:400;color:var(--muted);font-size:.85rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:12px}
+.card{background:var(--surface);border:2px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+.card.in{border-color:var(--cart);background:var(--cart-soft)}
+.pic{position:relative;aspect-ratio:4/3;background:var(--accent-soft);max-width:100%}
+.pic img{width:100%;height:100%;object-fit:cover;display:block}
+.pic .ini{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--display);font-size:2.4rem;color:var(--accent)}
+.badge{position:absolute;left:8px;top:8px;background:rgba(15,22,19,.78);color:#fff;font-size:.78rem;font-weight:700;padding:3px 8px;border-radius:999px}
+.tick{position:absolute;right:8px;top:8px;background:var(--cart);color:#2A1E00;font-weight:700;font-size:.85rem;padding:3px 9px;border-radius:999px}
+.body{padding:10px;display:flex;flex-direction:column;gap:8px}
+.name{font-weight:700;font-size:1.05rem;line-height:1.2;overflow-wrap:anywhere}
+label.f{display:flex;flex-direction:column;gap:3px;font-size:.78rem;color:var(--muted);font-weight:700;letter-spacing:.02em}
+label.f input{font:inherit;font-size:1.05rem;font-weight:400;color:var(--ink);padding:10px;border-radius:10px;border:2px solid var(--line);background:var(--ground);width:100%;min-width:0}
+label.f input:focus{outline:none;border-color:var(--accent);background:var(--surface)}
+.prix{position:relative}
+.prix input{padding-right:40px;font-variant-numeric:tabular-nums}
+.prix span{position:absolute;right:10px;bottom:11px;color:var(--muted);font-size:.9rem;pointer-events:none}
+.qty{display:flex;align-items:center;gap:6px}
+.qty button{flex:none;width:46px;height:46px;border-radius:12px;border:2px solid var(--line);background:var(--surface);color:var(--ink);font-size:1.5rem;font-weight:700;cursor:pointer;line-height:1}
+.qty button.plus{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.qty output{flex:1;text-align:center;font-size:1.3rem;font-weight:700;font-variant-numeric:tabular-nums}
+.sub{font-size:.85rem;color:var(--muted);text-align:center;min-height:1.1em;font-variant-numeric:tabular-nums}
+.del{font:inherit;font-size:.8rem;border:0;background:none;color:var(--warn);cursor:pointer;padding:0;text-align:left}
+.add{border:2px dashed var(--line);border-radius:14px;display:flex;flex-direction:column;justify-content:center;gap:8px;padding:12px;min-height:120px}
+.add button,.btn{font:inherit;font-weight:700;padding:11px 14px;border-radius:10px;border:0;background:var(--accent);color:var(--accent-ink);cursor:pointer}
+.add .ghost,.btn.ghost{background:none;color:var(--accent);border:2px solid var(--accent)}
+.add input{font:inherit;padding:10px;border-radius:10px;border:2px solid var(--line);background:var(--surface);color:var(--ink);width:100%}
+.empty{color:var(--muted);text-align:center;padding:40px 0}
+footer.bar{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px))}
+.bar .in{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.tot{flex:1;min-width:150px}
+.tot b{font-family:var(--display);font-size:1.35rem;font-variant-numeric:tabular-nums}
+.tot div{font-size:.85rem;color:var(--muted)}
+.confirm{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:.9rem}
+button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+</style>
+
+<header class="top">
+  <div class="row1"><h1>Courses de la Kasbah</h1><span class="sync" id="sync">…</span></div>
+  <div class="search"><input id="q" type="search" placeholder="Chercher un article…" autocomplete="off" aria-label="Chercher un article"><button id="qx" aria-label="Effacer" hidden>×</button></div>
+  <div class="chips" id="chips"></div>
+</header>
+
+<main class="wrap" id="list"></main>
+
+<footer class="bar"><div class="in">
+  <div class="tot"><b id="total">0 DH</b><div id="count">Panier vide</div></div>
+  <div id="resetZone"><button class="btn ghost" id="reset">Nouvelle course</button></div>
+</div></footer>
+
+<script>
+// Catalogue tiré du classeur « Gestion de stock » (onglets Petit-déjeuner, Entretien, Snack).
+// Les formats et prix saisis vivent dans la base de l'artefact, pas ici.
+const RAYONS=[
+ {id:"pdj",nom:"Petit-déjeuner"},{id:"epi",nom:"Épices & général"},{id:"ent",nom:"Entretien"},{id:"snk",nom:"Snack"}];
+const CAT=[
+ ["pdj-beurre","Beurre",1],["pdj-huile-olive","Huile d'olive",1],["pdj-oeufs","Œufs"],["pdj-confiture","Confiture",1],["pdj-miel","Miel",1],["pdj-cafe","Café"],["pdj-the","Thé",2],["pdj-sucre","Sucre",2],["pdj-gros-sucre","Gros sucre (pour le thé)",2],["pdj-serviettes","Serviettes en papier",3],["pdj-fruits","Fruits"],["pdj-menthe","Menthe"],
+ ["epi-sel","Sel"],["epi-curcuma","Curcuma"],["epi-cumin","Cumin"],["epi-gingembre","Gingembre"],["epi-poivre","Poivre"],["epi-poulet","Épices poulet"],["epi-poisson","Épices poissons"],["epi-ras","Khas al hanout"],["epi-huile","Huile normale"],["epi-smen","Beurre fermenté (smen)"],
+ ["ent-desodorisant","Désodorisant (pschit)",2],["ent-sanikawa","Sanikawa",1],["ent-javel","Javel",1],["ent-ariel","Lessive Ariel",1],["ent-savon","Savon pour les mains",1],["ent-vaisselle","Liquide vaisselle",1],["ent-eponge","Éponge",3],["ent-chiffon","Chiffon"],["ent-bala","Bala (pelle)"],["ent-balai","Balai"],
+ ["snk-pain-panini","Pain panini"],["snk-pain-burger","Pain burger"],["snk-frites","Frites"],["snk-nuggets","Nuggets"],["snk-kefta","Kefta"],["snk-tomates","Tomates"],["snk-oignons","Oignons"],["snk-sauce","Sauce"],["snk-dinde","Filet de dinde fumé"],["snk-avocat","Avocat"],["snk-oeufs","Œufs"],["snk-fromage","Fromage"],["snk-pain","Pain"],["snk-chameau","Viande de chameau"],["snk-huile-olive","Huile d'olive"],["snk-pain-tajine","Pain (tajine)"],["snk-orange","Orange"],["snk-eau","Eau 1,5 L",6],["snk-coca","Coca",6],["snk-poms","Pom's",6],["snk-hawai","Hawai",6],["snk-biere","Bière",6]
+].map(([id,nom,min])=>({id,nom,min:min||null,rayon:id.slice(0,3),img:"img/"+id+".jpg"}));
+
+const LS="courses-kasbah-v1";
+let state={};           // id -> {format, prix, qte, perso?, nom?, rayon?}
+let dirty=new Set();    // ids non encore enregistrés dans la base
+try{const c=JSON.parse(localStorage.getItem(LS)||"null"); if(c){state=c.state||{}; dirty=new Set(c.dirty||[]);}}catch(e){}
+function cache(){try{localStorage.setItem(LS,JSON.stringify({state,dirty:[...dirty]}))}catch(e){}}
+
+let db=null, online=true;
+const ui={rayon:"tout",todo:false,q:""};
+const $=s=>document.querySelector(s);
+const norm=s=>(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
+const num=v=>{const n=parseFloat(String(v??"").replace(",",".").replace(/[^\d.]/g,""));return isFinite(n)?n:null};
+const dh=n=>(Math.round(n*100)/100).toLocaleString("fr-FR")+" DH";
+const st=id=>state[id]||(state[id]={});
+
+function items(){
+  const perso=Object.entries(state).filter(([id,s])=>s.perso&&s.nom).map(([id,s])=>({id,nom:s.nom,min:null,rayon:s.rayon||"snk",img:null,perso:true}));
+  return CAT.concat(perso);
+}
+
+// ---------- rendu ----------
+function chips(){
+  const c=$("#chips"); c.innerHTML="";
+  const mk=(label,pressed,fn,cls)=>{const b=document.createElement("button");b.className="chip"+(cls?" "+cls:"");b.textContent=label;b.setAttribute("aria-pressed",pressed);b.onclick=fn;c.append(b)};
+  mk("Tout",ui.rayon==="tout",()=>{ui.rayon="tout";refresh()});
+  RAYONS.forEach(r=>mk(r.nom,ui.rayon===r.id,()=>{ui.rayon=r.id;refresh()}));
+  mk("Reste à prendre",ui.todo,()=>{ui.todo=!ui.todo;refresh()},"todo");
+}
+
+function card(it){
+  const s=st(it.id);
+  const el=document.createElement("article"); el.className="card"; el.dataset.id=it.id;
+  el.innerHTML=`<div class="pic">${it.img?`<img alt="" loading="lazy" src="${it.img}">`:`<div class="ini"></div>`}${it.min?`<span class="badge">min ${it.min}</span>`:""}<span class="tick" hidden></span></div>
+  <div class="body"><div class="name"></div>
+   <label class="f">FORMAT / FAÇON D'ACHAT<input id="f-${it.id}" data-k="format" type="text" placeholder="ex. 1 litre, 200 g" autocomplete="off"></label>
+   <label class="f prix">PRIX À L'UNITÉ<input id="p-${it.id}" data-k="prix" type="text" inputmode="decimal" placeholder="0" autocomplete="off"><span>DH</span></label>
+   <div class="qty"><button class="moins" aria-label="Retirer un">−</button><output>0</output><button class="plus" aria-label="Ajouter un">+</button></div>
+   <div class="sub"></div>${it.perso?`<button class="del">Supprimer cet article</button>`:""}</div>`;
+  el.querySelector(".name").textContent=it.nom;
+  if(it.perso) el.querySelector(".ini").textContent=it.nom.trim().charAt(0).toUpperCase();
+  const img=el.querySelector("img"); if(img) img.onerror=()=>{img.remove()};
+  el.querySelectorAll("input").forEach(inp=>{
+    let t; inp.addEventListener("input",()=>{st(it.id)[inp.dataset.k]=inp.value; clearTimeout(t); t=setTimeout(()=>save(it.id),900); paint(it.id); totals();});
+    inp.addEventListener("change",()=>{clearTimeout(t);save(it.id)});
+  });
+  el.querySelector(".plus").onclick=()=>{const s=st(it.id);s.qte=(s.qte||0)+1;paint(it.id);totals();save(it.id)};
+  el.querySelector(".moins").onclick=()=>{const s=st(it.id);if(!s.qte)return;s.qte--;paint(it.id);totals();save(it.id);if(ui.todo)refresh()};
+  const del=el.querySelector(".del");
+  if(del) del.onclick=()=>{ if(del.dataset.sure){ delete state[it.id]; cache(); if(db) db.doc("articles/"+it.id).delete().catch(()=>{}); build(); } else {del.dataset.sure=1;del.textContent="Toucher encore pour confirmer";setTimeout(()=>{del.dataset.sure="";del.textContent="Supprimer cet article"},4000)} };
+  return el;
+}
+
+function paint(id){
+  const el=document.querySelector(`.card[data-id="${CSS.escape(id)}"]`); if(!el) return;
+  const s=st(id), q=s.qte||0, p=num(s.prix);
+  el.classList.toggle("in",q>0);
+  const tick=el.querySelector(".tick"); tick.hidden=!q; tick.textContent="✓ "+q;
+  el.querySelector("output").textContent=q;
+  el.querySelectorAll("input").forEach(inp=>{ if(document.activeElement!==inp){ const v=s[inp.dataset.k]; inp.value=v==null?"":String(v);} });
+  el.querySelector(".sub").textContent=q&&p!=null?`${q} × ${dh(p)} = ${dh(q*p)}`:(q&&p==null?"Prix à noter":"");
+}
+
+let built=false;
+function build(){
+  const list=$("#list"); list.innerHTML="";
+  const all=items();
+  RAYONS.forEach(r=>{
+    const sec=document.createElement("section"); sec.className="rayon"; sec.dataset.r=r.id;
+    sec.innerHTML=`<h2>${r.nom} <small></small></h2><div class="grid"></div>`;
+    const g=sec.querySelector(".grid");
+    all.filter(i=>i.rayon===r.id).forEach(i=>g.append(card(i)));
+    g.append(addTile(r.id));
+    list.append(sec);
+  });
+  const e=document.createElement("p"); e.className="empty"; e.id="empty"; e.hidden=true; e.textContent="Aucun article ne correspond."; list.append(e);
+  all.forEach(i=>paint(i.id)); built=true; refresh();
+}
+
+function addTile(rayon){
+  const d=document.createElement("div"); d.className="add"; d.dataset.add=1;
+  const idle=()=>{d.innerHTML=`<button class="ghost">+ Ajouter un article</button>`; d.querySelector("button").onclick=open;};
+  const open=()=>{d.innerHTML=`<input id="new-${rayon}" placeholder="Nom de l'article" autocomplete="off"><button>Ajouter</button><button class="ghost">Annuler</button>`;
+    const inp=d.querySelector("input"); inp.focus();
+    const ok=()=>{const nom=inp.value.trim(); if(!nom) return inp.focus();
+      const id="perso-"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+      state[id]={perso:true,nom,rayon,qte:0}; save(id); build();
+      setTimeout(()=>document.getElementById("f-"+id)?.focus(),50);};
+    d.querySelectorAll("button")[0].onclick=ok; d.querySelectorAll("button")[1].onclick=idle;
+    inp.onkeydown=e=>{if(e.key==="Enter")ok(); if(e.key==="Escape")idle();};};
+  idle(); return d;
+}
+
+function refresh(){
+  chips();
+  const q=norm(ui.q); let shown=0;
+  document.querySelectorAll("section.rayon").forEach(sec=>{
+    let n=0, tot=0;
+    sec.querySelectorAll(".card").forEach(c=>{
+      const it=items().find(i=>i.id===c.dataset.id); tot++;
+      const ok=(ui.rayon==="tout"||sec.dataset.r===ui.rayon)&&(!q||norm(it?.nom).includes(q))&&(!ui.todo||!(st(c.dataset.id).qte>0));
+      c.hidden=!ok; if(ok) n++;
+    });
+    const addT=sec.querySelector("[data-add]"); addT.hidden=!!q||ui.todo;
+    sec.hidden=(ui.rayon!=="tout"&&sec.dataset.r!==ui.rayon)||(n===0&&(q||ui.todo));
+    const pris=[...sec.querySelectorAll(".card")].filter(c=>st(c.dataset.id).qte>0).length;
+    sec.querySelector("h2 small").textContent=`${pris}/${tot} pris`;
+    shown+=sec.hidden?0:n;
+  });
+  $("#empty").hidden=shown>0; $("#qx").hidden=!ui.q;
+}
+
+function totals(){
+  let n=0,t=0,sans=0;
+  Object.entries(state).forEach(([id,s])=>{const q=s.qte||0; if(!q)return; if(s.perso&&!s.nom)return; n++; const p=num(s.prix); if(p==null) sans++; else t+=q*p;});
+  $("#total").textContent=dh(t);
+  $("#count").textContent=n?`${n} article${n>1?"s":""} dans le panier${sans?` · ${sans} sans prix`:""}`:"Panier vide";
+}
+
+function syncLabel(){
+  const el=$("#sync");
+  if(!db){el.textContent="Sur ce téléphone seulement";el.className="sync off";return}
+  if(dirty.size){el.textContent=`${dirty.size} en attente d'envoi`;el.className="sync off";return}
+  el.textContent="✓ Enregistré";el.className="sync";
+}
+
+// ---------- enregistrement ----------
+const busy={}, again={};
+function clean(s){const o={maj:new Date().toISOString()};["format","prix","qte","perso","nom","rayon"].forEach(k=>{if(s[k]!==undefined&&s[k]!=="")o[k]=s[k]});if(o.prix!=null){const p=num(o.prix);o.prix=p==null?String(o.prix):p;}return o;}
+function save(id){ dirty.add(id); cache(); syncLabel(); if(!db) return; if(busy[id]){again[id]=true;return} flush(id); }
+async function flush(id){
+  busy[id]=true;
+  do{ again[id]=false;
+    try{ if(state[id]) await db.doc("articles/"+id).set(clean(state[id])); dirty.delete(id); }
+    catch(e){ busy[id]=false; cache(); syncLabel(); return; }
+  }while(again[id]);
+  busy[id]=false; cache(); syncLabel();
+}
+function retry(){ [...dirty].forEach(id=>{ if(!busy[id]) flush(id) }) }
+addEventListener("online",retry);
+setInterval(()=>{ if(dirty.size&&db) retry() },20000);
+
+// ---------- nouvelle course ----------
+function resetIdle(){
+  const z=$("#resetZone");
+  z.innerHTML=`<button class="btn ghost" id="reset">Nouvelle course</button>`;
+  $("#reset").onclick=()=>{
+    z.innerHTML=`<div class="confirm">Vider le panier ? Les prix restent. <button class="btn" id="rOk">Vider</button><button class="btn ghost" id="rNo">Annuler</button></div>`;
+    $("#rNo").onclick=resetIdle;
+    $("#rOk").onclick=()=>{Object.keys(state).forEach(id=>{if(state[id].qte){state[id].qte=0;paint(id);save(id)}});totals();refresh();resetIdle()};
+  };
+}
+resetIdle();
+
+// ---------- recherche ----------
+$("#q").addEventListener("input",e=>{ui.q=e.target.value;refresh()});
+$("#qx").onclick=()=>{$("#q").value="";ui.q="";refresh();$("#q").focus()};
+
+// ---------- démarrage ----------
+build(); totals(); syncLabel();
+(async()=>{
+  try{ db=await window.claude?.use?.("db"); }catch(e){ db=null }
+  syncLabel(); if(!db) return;
+  retry();
+  db.collection("articles").onSnapshot(snap=>{
+    let persoChange=false;
+    snap.docChanges().forEach(ch=>{
+      const id=ch.doc.id;
+      if(ch.type==="removed"){ if(state[id]?.perso) persoChange=true; if(!dirty.has(id)) delete state[id]; return; }
+      if(dirty.has(id)||busy[id]) return; // la saisie locale gagne tant qu'elle n'est pas envoyée
+      const d=ch.doc.data()||{}; const had=!!state[id];
+      state[id]={format:d.format??"",prix:d.prix??"",qte:d.qte||0,perso:d.perso,nom:d.nom,rayon:d.rayon};
+      if(d.perso&&!had) persoChange=true;
+    });
+    cache();
+    if(persoChange){ const f=document.activeElement?.id; build(); if(f) document.getElementById(f)?.focus(); }
+    else items().forEach(i=>paint(i.id));
+    totals(); refresh();
+  },()=>{ syncLabel() });
+})();
+</script>
