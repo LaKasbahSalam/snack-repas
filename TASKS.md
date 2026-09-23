@@ -11,6 +11,9 @@
 
 ## Fait
 - [x] Photos Pom's et Hawai dans l'appli (page Vente et page Équipe) — KasbahCalendar, `SnackImage.tsx`, non commité — 22/09/2026
+- [x] Boissons : prix équipe (6 DH par défaut, au lieu du prix d'achat) envoyé à l'appli via la colonne « Prix équipe » de l'onglet Boissons — 22/09/2026
+- [x] Fiche technique des quatre outils écrite (`docs/FICHE-TECHNIQUE.md`) — 22/09/2026
+- [x] Journal Snack : colonnes client, vendeur, part vendeur et part hôtel ajoutées en F à I (vides tant que l'appli ne les envoie pas — migration `20260921200000` de KasbahCalendar) — 21/09/2026
 - [x] Boissons dans leur propre onglet — 20/09/2026
 - [x] Écrire une Fiche repas avec le prix coûtant de chaque ingrédient et sandwich, la recette et le prix de vente de chaque sandwich — 18/09/2026
 - [x] Connecter la Fiche repas à l'appli KasbahCalendar pour permettre à l'équipe d'acheter les ingrédients à prix coûtant (dette réglée par une entrée caisse « +X snack pseudo ») — 18/09/2026
