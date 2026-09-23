@@ -26,7 +26,7 @@
 body{background:var(--ground);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.4;padding-inline:16px;padding-bottom:96px}
 .wrap{max-width:1100px;margin:0 auto}
 header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--ground);padding-block:12px 10px;margin-inline:-16px;padding-inline:16px;border-bottom:1px solid var(--line)}
-.row1{display:flex;align-items:center;gap:10px;max-width:1100px;margin:0 auto}
+.row1{display:flex;align-items:center;gap:8px 10px;flex-wrap:wrap;max-width:1100px;margin:0 auto}
 h1{font-family:var(--display);font-size:1.25rem;margin:0;flex:1;letter-spacing:-.01em}
 .sync{font-size:.8rem;color:var(--muted);white-space:nowrap}
 .sync.off{color:var(--warn)}
@@ -74,11 +74,36 @@ footer.bar{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--sur
 .tot b{font-family:var(--display);font-size:1.35rem;font-variant-numeric:tabular-nums}
 .tot div{font-size:.85rem;color:var(--muted)}
 .confirm{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:.9rem}
+.vue{font:inherit;font-size:.85rem;font-weight:700;padding:6px 10px;border-radius:8px;border:2px solid var(--accent);background:none;color:var(--accent);cursor:pointer;white-space:nowrap}
+/* Vue compacte : une ligne par article, sans photo */
+body.compact section.rayon{margin-top:14px}
+body.compact section.rayon h2{margin-bottom:6px}
+body.compact .grid{grid-template-columns:1fr;gap:6px}
+body.compact .pic{display:none}
+body.compact .card{border-radius:10px;border-width:1px}
+body.compact .card.in{border-width:2px}
+body.compact .body{padding:6px 8px;display:grid;grid-template-columns:1fr 1fr auto;grid-template-areas:"name name qty" "fmt prix qty" "sub sub sub";gap:4px 6px;align-items:center}
+body.compact .name{grid-area:name;font-size:.95rem}
+body.compact .name::after{content:attr(data-min);font-weight:400;color:var(--muted);font-size:.78rem;margin-left:6px}
+body.compact label.f{font-size:0;gap:0}
+body.compact label.f input{font-size:.95rem;padding:6px 8px;border-radius:8px;border-width:1px}
+body.compact label.f:not(.prix){grid-area:fmt}
+body.compact label.prix{grid-area:prix}
+body.compact .prix span{bottom:7px;font-size:.8rem}
+body.compact .prix input{padding-right:32px}
+body.compact .qty{grid-area:qty;flex-direction:column-reverse;gap:2px}
+body.compact .qty button{width:38px;height:30px;border-radius:8px;font-size:1.1rem;border-width:1px}
+body.compact .qty output{font-size:1rem;line-height:1.1}
+body.compact .sub{grid-area:sub;font-size:.75rem;min-height:0;text-align:left}
+body.compact .sub:empty{display:none}
+body.compact .del{grid-area:sub;font-size:.75rem}
+body.compact .add{min-height:0;padding:8px;flex-direction:row;flex-wrap:wrap;border-radius:10px}
+body.compact .add button{padding:7px 10px;font-size:.9rem}
 button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 </style>
 
 <header class="top">
-  <div class="row1"><h1>Courses de la Kasbah</h1><span class="sync" id="sync">…</span></div>
+  <div class="row1"><h1>Courses de la Kasbah</h1><span class="sync" id="sync">…</span><button class="vue" id="vue">Vue compacte</button></div>
   <div class="search"><input id="q" type="search" placeholder="Chercher un article…" autocomplete="off" aria-label="Chercher un article"><button id="qx" aria-label="Effacer" hidden>×</button></div>
   <div class="chips" id="chips"></div>
 </header>
@@ -140,6 +165,8 @@ function card(it){
    <div class="qty"><button class="moins" aria-label="Retirer un">−</button><output>0</output><button class="plus" aria-label="Ajouter un">+</button></div>
    <div class="sub"></div>${it.perso?`<button class="del">Supprimer cet article</button>`:""}</div>`;
   el.querySelector(".name").textContent=it.nom;
+  if(it.min) el.querySelector(".name").dataset.min="min "+it.min;
+  el.querySelector('[data-k="format"]').placeholder="Format";
   if(it.perso) el.querySelector(".ini").textContent=it.nom.trim().charAt(0).toUpperCase();
   const img=el.querySelector("img"); if(img) img.onerror=()=>{img.remove()};
   el.querySelectorAll("input").forEach(inp=>{
@@ -253,6 +280,15 @@ function resetIdle(){
   };
 }
 resetIdle();
+
+// ---------- vue compacte / photos (retenue sur ce téléphone) ----------
+function setVue(c){
+  document.body.classList.toggle("compact",c);
+  $("#vue").textContent=c?"Vue photos":"Vue compacte";
+  try{localStorage.setItem("courses-vue",c?"compact":"photos")}catch(e){}
+}
+$("#vue").onclick=()=>setVue(!document.body.classList.contains("compact"));
+try{setVue(localStorage.getItem("courses-vue")==="compact")}catch(e){setVue(false)}
 
 // ---------- recherche ----------
 $("#q").addEventListener("input",e=>{ui.q=e.target.value;refresh()});
