@@ -11,15 +11,14 @@
  *   E Frites              coché = « avec ou sans frites » à choisir
  *   F Code                identifiant fixe de l'article dans l'appli
  *   G Prix envoyé         écrit par le script au dernier envoi
- *   H Retenue             ce que la maison garde sur le bénéfice avant la
- *                         prime du vendeur, en dirhams. Créée et pré-remplie
- *                         par le script : 5 DH, 1 DH sur les boissons.
- *                         Modifiable ligne par ligne, vide = 5 DH
  *
  * Le prix de revient part avec la carte : il est lu dans « Cout par item »
  * (ligne « Coût revient ») ou, pour une boisson, dans « Boissons »
  * (colonne B, prix d'achat). C'est lui qui permet à l'appli de calculer la
- * prime du vendeur = (prix de vente − coût − retenue) × quantité.
+ * prime du vendeur : 80 % du bénéfice de la vente, l'hôtel en garde 20 %
+ * (décision du 25/09/2026, taux fixé dans l'appli). La colonne « Retenue »
+ * en dirhams qui précédait n'est plus lue ni envoyée : on peut la
+ * supprimer de l'onglet.
  *
  * Le code `menu_frites` n'est pas un article : c'est le prix ajouté quand
  * on choisit « avec frites ». Il est obligatoire dès qu'une case Frites
@@ -31,11 +30,8 @@
  */
 
 const FEUILLE_CARTE = 'Carte appli';
-const ENTETES_CARTE = ['Rubrique', 'Article', 'Produit de la fiche', 'Sauce', 'Frites', 'Code', 'Prix envoyé', 'Retenue'];
+const ENTETES_CARTE = ['Rubrique', 'Article', 'Produit de la fiche', 'Sauce', 'Frites', 'Code', 'Prix envoyé'];
 const CODE_SUPPLEMENT_FRITES = 'menu_frites';
-const ENTETE_RETENUE = 'Retenue';
-const RETENUE_DEFAUT = 5;
-const RETENUE_BOISSON = 1;
 
 // Pré-remplissage, d'après la carte Snacks and Drinks.
 const CARTE_DEPART = [
@@ -77,8 +73,7 @@ function creerCarteAppli() {
     c.getRange(2, 4, n, 2).insertCheckboxes();
     c.getRange(2, 6, n, 1).setBackground('#fff2cc');
     c.getRange(2, 7, n, 1).setNumberFormat('0.00').setFontColor('#666666');
-    c.getRange(2, 8, n, 1).setValues(CARTE_DEPART.map((l) => [retenuePour_(l[0])])).setNumberFormat('0.00');
-    [110, 220, 150, 60, 60, 170, 90, 80].forEach((w, i) => c.setColumnWidth(i + 1, w));
+    [110, 220, 150, 60, 60, 170, 90].forEach((w, i) => c.setColumnWidth(i + 1, w));
 
     const introuvables = CARTE_DEPART
       .map((l, i) => ({ l, r: i + 2 }))
@@ -95,34 +90,6 @@ function creerCarteAppli() {
   } catch (e) {
     ui.alert(`Impossible : ${e.message}`);
   }
-}
-
-/** Retenue proposée d'après la rubrique : 1 DH sur les boissons, 5 DH ailleurs. */
-function retenuePour_(rubrique) {
-  return /boisson/i.test(String(rubrique)) ? RETENUE_BOISSON : RETENUE_DEFAUT;
-}
-
-/**
- * Colonne « Retenue » de l'onglet Carte appli : retrouvée par son en-tête,
- * créée à droite et pré-remplie si elle manque (carte faite avant que la
- * prime du vendeur existe). Rien n'est écrasé si elle est déjà là.
- */
-function colonneRetenue_(c) {
-  const entetes = c.getRange(1, 1, 1, Math.max(c.getLastColumn(), 1)).getValues()[0];
-  const i = entetes.findIndex((e) => String(e).trim() === ENTETE_RETENUE);
-  if (i >= 0) return i + 1;
-
-  const col = c.getLastColumn() + 1;
-  c.getRange(1, col).setValue(ENTETE_RETENUE).setFontWeight('bold').setBackground('#efefef');
-  c.setColumnWidth(col, 80);
-  const n = c.getLastRow() - 1;
-  if (n > 0) {
-    const rubriques = c.getRange(2, 1, n, 1).getValues();
-    c.getRange(2, col, n, 1)
-      .setValues(rubriques.map((l) => [String(l[0]).trim() ? retenuePour_(l[0]) : '']))
-      .setNumberFormat('0.00');
-  }
-  return col;
 }
 
 /**
@@ -186,9 +153,7 @@ function lireCarte_() {
   if (!c || c.getLastRow() < 2) return null;
   const prix = prixDeVente_();
   const cout = coutDeRevient_();
-  const colRetenue = colonneRetenue_(c);
   const lignes = c.getRange(2, 1, c.getLastRow() - 1, 6).getValues();
-  const retenues = c.getRange(2, colRetenue, c.getLastRow() - 1, 1).getValues();
   const carte = [];
   const vus = {};
   lignes.forEach((l, i) => {
@@ -212,10 +177,6 @@ function lireCarte_() {
     // Coût de revient : sans lui l'appli ne donne pas de prime, mais la
     // vente doit rester possible. On n'arrête donc pas l'envoi.
     const revient = cout[cle_(produit)];
-    const retenue = retenues[i][0];
-    if (retenue !== '' && retenue !== null && (typeof retenue !== 'number' || retenue < 0)) {
-      throw new Error(`${ou} : retenue « ${retenue} » : un nombre de dirhams, 0 ou plus (vide = ${RETENUE_DEFAUT} DH).`);
-    }
     carte.push({
       code: code,
       rubrique: String(rubrique).trim(),
@@ -224,7 +185,6 @@ function lireCarte_() {
       sauce: sauce === true || /^oui$/i.test(String(sauce).trim()),
       frites: frites === true || /^oui$/i.test(String(frites).trim()),
       cout: typeof revient === 'number' && revient > 0 ? revient : null,
-      retenue: typeof retenue === 'number' ? retenue : RETENUE_DEFAUT,
       position: carte.length,
       ligne: r,
     });

@@ -22,6 +22,7 @@ class FausseFeuille {
   constructor(grille) {
     this.g = grille;
     this.formules = {};   // { numéro de ligne : formule écrite en colonne E }
+    this.formulesA1 = {}; // { « H5 » : formule écrite dans cette case }
     this.lignesGelees = 0;
   }
   getMaxRows() { return this.g.length; }
@@ -51,9 +52,15 @@ class FausseFeuille {
         return api;
       },
       setFormulas: (f) => {
-        f.forEach((l, i) => { feuille.formules[r + i] = l[0]; g[r - 1 + i][c - 1] = l[0]; });
+        f.forEach((l, i) => l.forEach((x, k) => {
+          const col = c + k;
+          if (col === 5) feuille.formules[r + i] = x;
+          feuille.formulesA1[String.fromCharCode(64 + col) + (r + i)] = x;
+          g[r - 1 + i][col - 1] = x;
+        }));
         return api;
       },
+      setFormula: (x) => api.setFormulas([[x]]),
       // Mise en forme : acceptée et ignorée.
       setNumberFormat: () => api, setBackground: () => api, setFontWeight: () => api,
       setFontColor: () => api, clearContent: () => api, insertCheckboxes: () => api,

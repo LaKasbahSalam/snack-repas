@@ -4,8 +4,8 @@
  *   node tests/carte.test.js
  *
  * L'enjeu : la prime du vendeur se calcule dans l'appli à partir du prix de
- * revient et de la retenue que CE script envoie. S'ils manquent, la prime
- * tombe à zéro sans que rien ne le signale. Ce test fait tourner le script
+ * revient que CE script envoie (80 % du bénéfice depuis le 25/09/2026). S'il
+ * manque, la prime tombe à zéro sans que rien ne le signale. Ce test fait tourner le script
  * sur une fausse feuille et vérifie ce qui part.
  */
 const fs = require("fs");
@@ -38,8 +38,7 @@ boissons[0] = ["Boisson", "Prix d'achat", "Prix de vente", "", ""];
 boissons[1] = ["Coca / Hawai", 6, 12, "", ""];
 boissons[2] = ["Théière", 3, 15, "", ""];
 
-// « Carte appli » SANS colonne Retenue : une carte d'avant la prime, que le
-// script doit compléter tout seul.
+// « Carte appli » telle qu'elle est depuis le 25/09/2026 : A à G.
 const carte = grilleVide(6, 7);
 carte[0] = ["Rubrique", "Article", "Produit de la fiche", "Sauce", "Frites", "Code", "Prix envoyé"];
 carte[1] = ["Paninis", "Panini kefta", "PaniniKefta", true, true, "panini_kefta", ""];
@@ -69,23 +68,18 @@ verifier(par("coca").prix_vente === 12 && par("coca").cout === 6,
   "boisson : prix de vente et prix d'achat de l'onglet Boissons",
   JSON.stringify([par("coca").prix_vente, par("coca").cout]));
 verifier(par("menu_frites").cout === 4, "supplément frites : son coût part aussi", par("menu_frites").cout);
-verifier(par("panini_kefta").retenue === 5, "retenue par défaut : 5 DH", par("panini_kefta").retenue);
-verifier(par("coca").retenue === 1, "rubrique Boissons : retenue de 1 DH", par("coca").retenue);
 verifier(par("panini_kefta").sauce === true && par("panini_kefta").frites === true,
   "options sauce et frites transmises", "");
-verifier(carte[0][7] === "Retenue",
-  "la colonne Retenue est créée si elle manque", carte[0][7]);
-verifier(carte[1][7] === 5 && carte[2][7] === 1,
-  "et pré-remplie : 5 DH, 1 DH sur les boissons", JSON.stringify([carte[1][7], carte[2][7]]));
+verifier(envoyee.every((a) => !("retenue" in a)),
+  "plus de retenue en dirhams dans l'envoi : le taux est fixé dans l'appli", JSON.stringify(par("coca")));
+verifier(carte[0][7] === undefined || carte[0][7] === "",
+  "aucune colonne Retenue n'est plus créée", carte[0][7]);
 
-// Une retenue écrite à la main est respectée, une valeur absurde refusée.
-carte[1][7] = 0;
-const relue = vm.runInContext("lireCarte_()", ctx).find((a) => a.code === "panini_kefta");
-verifier(relue.retenue === 0, "retenue à 0 saisie à la main : respectée", relue.retenue);
-carte[1][7] = -3;
-let refuse = false;
-try { vm.runInContext("lireCarte_()", ctx); } catch { refuse = true; }
-verifier(refuse, "retenue négative : l'envoi est refusé, rien ne part", "acceptée");
+// Une vieille colonne « Retenue » restée dans l'onglet n'est ni lue ni gênante.
+carte[0][7] = "Retenue"; carte[1][7] = -3;
+let lue = true;
+try { vm.runInContext("lireCarte_()", ctx); } catch { lue = false; }
+verifier(lue, "ancienne colonne Retenue laissée dans l'onglet : ignorée, l'envoi part", "refusé");
 
 console.log(echecs === 0 ? "\nTout passe.\n" : `\n${echecs} échec(s).\n`);
 process.exit(echecs === 0 ? 0 : 1);

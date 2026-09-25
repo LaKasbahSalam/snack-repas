@@ -8,12 +8,25 @@
  *   E Montant total cumulé  formule, cumul de la colonne D
  *   F Client                à qui (nom de la fiche, ou « pas dans la liste »)
  *   G Vendeur               pseudo de qui a vendu
- *   H Part vendeur          sa prime
- *   I Part hôtel            le reste : D = H + I
+ *   H Part vendeur          sa prime : formule =MAX(0;ARRONDI(K×(1−L);2))
+ *   I Part hôtel            le reste : formule =D−H
+ *   J Cout                  coût de revient de la vente, frites comprises
+ *   K Benefice              formule =D−J
+ *   L Commission hotel      part du bénéfice gardée par l'hôtel (20 %)
  *
- * F à I depuis le 21/09/2026, à la fin pour ne rien déplacer. Tant que la
- * base ne les envoie pas (migration 20260921200000 pas encore passée),
- * elles restent vides : le script ne casse pas.
+ * F à I depuis le 21/09/2026, J à L depuis le 25/09/2026, à la fin pour ne
+ * rien déplacer. Tant que la base ne les envoie pas, elles restent vides :
+ * le script ne casse pas.
+ *
+ * H et I sont des formules sur J et L, pour qu'on voie sur chaque vente
+ * comment la commission s'applique. J et L sont figés au jour de la vente
+ * par l'appli : changer le taux plus tard ne réécrit pas les lignes
+ * passées. L'appli fait le même calcul et crédite la prime au vendeur ;
+ * si l'on corrige D ou J à la main, H suit la formule mais le solde du
+ * vendeur dans l'appli, lui, ne bouge pas.
+ *
+ * Vente d'avant le 25/09/2026 (ou base pas encore migrée) : pas de coût
+ * ni de taux, H et I sont alors les valeurs calculées par l'appli.
  *
  * Le sens est un TIRAGE, comme pour la caisse du classeur Exercices :
  * c'est ce script qui demande les ventes à l'appli, les écrit, puis
@@ -34,7 +47,7 @@
 
 const FEUILLE_JOURNAL = 'Journal Snack';
 const ENTETES_JOURNAL = ['Id', 'Date', 'Description', 'Montant', 'Montant total cumule',
-  'Client', 'Vendeur', 'Part vendeur', 'Part hotel'];
+  'Client', 'Vendeur', 'Part vendeur', 'Part hotel', 'Cout', 'Benefice', 'Commission hotel'];
 
 /**
  * Va chercher les ventes et les écrit. Rend le nombre de lignes ajoutées.
@@ -49,15 +62,19 @@ function tirerVentesSnack_(secret) {
     const ventes = demanderVentes_(secret);
     if (ventes.length === 0) return 0;
 
-    // Ligne d'en-tête si l'onglet est vierge ; sur un onglet d'avant le
-    // 21/09, seules les en-têtes manquantes (F à I) sont posées.
+    // Ligne d'en-tête si l'onglet est vierge ; sur un onglet plus ancien,
+    // seules les en-têtes manquantes à partir de F sont posées.
     if (j.getLastRow() === 0) {
       j.getRange(1, 1, 1, ENTETES_JOURNAL.length).setValues([ENTETES_JOURNAL])
         .setFontWeight('bold').setBackground('#efefef');
       j.setFrozenRows(1);
-    } else if (j.getRange(1, 6).getValue() === '') {
-      j.getRange(1, 6, 1, ENTETES_JOURNAL.length - 5).setValues([ENTETES_JOURNAL.slice(5)])
-        .setFontWeight('bold').setBackground('#efefef');
+    } else {
+      const entete = j.getRange(1, 1, 1, ENTETES_JOURNAL.length).getValues()[0];
+      ENTETES_JOURNAL.forEach((e, k) => {
+        if (k >= 5 && entete[k] === '') {
+          j.getRange(1, k + 1).setValue(e).setFontWeight('bold').setBackground('#efefef');
+        }
+      });
     }
 
     // Ce que l'onglet a déjà, pour ne rien écrire deux fois même si un
@@ -91,15 +108,28 @@ function tirerVentesSnack_(secret) {
     }));
     j.getRange(depart, 5, aEcrire.length, 1).setNumberFormat('0.00');
 
-    // F à I : qui, et le partage. Vides si la base ne les envoie pas encore.
+    // F à L : qui, le partage, et de quoi il se calcule. Vides si la base
+    // ne les envoie pas encore.
     const nombre = (x) => (x === undefined || x === null || x === '' ? '' : Number(x) || 0);
-    j.getRange(depart, 6, aEcrire.length, 4).setValues(aEcrire.map((v) => [
+    const calculable = (v) => nombre(v.cout) !== '' && nombre(v.commission_hotel) !== '';
+    j.getRange(depart, 6, aEcrire.length, 7).setValues(aEcrire.map((v) => [
       String(v.client || '').slice(0, 200),
       String(v.vendeur || '').slice(0, 50),
       nombre(v.part_vendeur),
       nombre(v.part_hotel),
+      calculable(v) ? nombre(v.cout) : '',
+      '',
+      calculable(v) ? nombre(v.commission_hotel) / 100 : '',
     ]));
-    j.getRange(depart, 8, aEcrire.length, 2).setNumberFormat('0.00');
+    // Le partage en formules, sur les ventes qui portent coût et taux.
+    aEcrire.forEach((v, i) => {
+      if (!calculable(v)) return;
+      const r = depart + i;
+      j.getRange(r, 8, 1, 2).setFormulas([[`=MAX(0,ROUND(K${r}*(1-L${r}),2))`, `=D${r}-H${r}`]]);
+      j.getRange(r, 11).setFormula(`=D${r}-J${r}`);
+    });
+    j.getRange(depart, 8, aEcrire.length, 4).setNumberFormat('0.00');
+    j.getRange(depart, 12, aEcrire.length, 1).setNumberFormat('0%');
 
     // Écrit pour de bon avant d'accuser réception : si le script s'arrête
     // ici (temps dépassé), les lignes sont dans l'onglet et l'accusé

@@ -61,11 +61,14 @@ Tout passe par une seule Edge Function, `import-prix-snack` :
 - **Le classeur envoie** les prix coûtants des ingrédients, le prix équipe des
   boissons (colonne « Prix équipe » de l'onglet « Boissons », 6 DH par défaut :
   une boisson n'est pas cédée à son prix d'achat), et la carte de
-  vente (onglet « Carte appli ») avec le prix de revient et la **retenue** de
-  chaque article — c'est elle qui décide de la prime du vendeur : 5 DH par
-  défaut, 1 DH sur les boissons.
+  vente (onglet « Carte appli ») avec le prix de revient de chaque article.
+  La prime du vendeur est 80 % du bénéfice de la vente ; l'hôtel en garde
+  20 % (taux fixé dans l'appli, `snack_commission_hotel()`, depuis le
+  25/09/2026).
 - **Le classeur vient chercher** les ventes faites dans l'appli et les écrit
-  dans l'onglet « Journal Snack », puis accuse réception.
+  dans l'onglet « Journal Snack », puis accuse réception. Chaque vente y
+  porte son coût et son taux, et le partage vendeur / hôtel y est une
+  formule sur ces cases.
 
 L'appli n'écrit **jamais** dans le classeur : pas de compte de service
 Google, pas de clé privée à protéger. Le classeur demande, l'appli répond.

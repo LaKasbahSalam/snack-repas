@@ -60,7 +60,7 @@ lendemain.
 ### Fiche repas — libre, sans rien demander
 
 - Renommer un ingrédient, un produit, une boisson, un article de la carte.
-- Changer un prix d'achat, une quantité, un prix de vente, une retenue.
+- Changer un prix d'achat, une quantité, un prix de vente.
 - Ajouter une ligne ou une colonne (par le menu de préférence, à la main sinon).
 - Réordonner les lignes, mettre des couleurs, écrire des notes.
 
@@ -119,8 +119,8 @@ document — y compris ce que vous vouliez garder.
 |---|---|---|
 | **Cout par item** | Un ingrédient par ligne, un produit par colonne : coût de revient, marge, prix conseillé | Vous + le menu Snack |
 | **Boissons** | Une boisson par ligne : prix d'achat, prix de vente, code et prix équipe | Vous + le menu Snack |
-| **Carte appli** | Ce que l'équipe vend aux clients : rubrique, article, code, retenue | Vous + le menu Snack |
-| **Journal Snack** | Une ligne par vente faite dans l'appli | Le script, uniquement en bas |
+| **Carte appli** | Ce que l'équipe vend aux clients : rubrique, article, code | Vous + le menu Snack |
+| **Journal Snack** | Une ligne par vente faite dans l'appli, avec le partage vendeur / hôtel en formules | Le script, uniquement en bas |
 
 ## Le produit et l'article : la ligne de partage
 
@@ -144,7 +144,7 @@ combien il se vend.
    │ B  4,50 (achat)  │──── coût ───▶│                    │
    │ C  10,00 (vente) │──── prix ───▶│                    │
    │ F  sprite ───────┼──┐           │ F  sprite ─────────┼──┐
-   │ G  6,00          │──┼── code ──▶│ H  1,00 (retenue)  │  │ code
+   │ G  6,00          │──┼── code ──▶│                    │  │ code
    └──────────────────┘  │  équipe   └────────────────────┘  │ carte
                          ▼                                    ▼
                   Page Snack de l'équipe              Écran de vente client
@@ -176,9 +176,10 @@ dangereux.**
 
 Le prix de revient suit le même chemin que le prix : pour une boisson, c'est le
 prix d'achat (colonne B) ; pour un plat, la ligne « Coût revient » de « Cout par
-item ». C'est lui qui donne la prime du vendeur — prix de vente − coût −
-retenue. Un produit sans coût de revient se vend quand même, mais ne rapporte
-rien au vendeur, et rien ne le signale au moment de la vente.
+item ». C'est lui qui donne la prime du vendeur : 80 % du bénéfice de la vente
+(prix de vente − coût), l'hôtel en garde 20 %. Un produit sans coût de revient
+se vend quand même, mais ne rapporte rien au vendeur, et rien ne le signale au
+moment de la vente.
 
 ## Le menu Snack, bouton par bouton
 
@@ -218,13 +219,13 @@ Le bouton le plus utilisé. Il travaille sur l'onglet où vous êtes.
 - **Ce qui l'arrête** : un prix manquant, un code déjà pris, une ligne vide.
 
 ### Créer l'onglet Carte appli
-- Crée l'onglet et le pré-remplit d'après la carte papier : rubrique, article, produit de la fiche, cases Sauce et Frites, code, retenue (5 DH, 1 DH sur les boissons).
-- La **retenue** est ce que la maison garde avant la prime du vendeur : prime = (prix de vente − coût de revient − retenue) × quantité. Vide = 5 DH.
+- Crée l'onglet et le pré-remplit d'après la carte papier : rubrique, article, produit de la fiche, cases Sauce et Frites, code.
+- La prime du vendeur ne se règle plus ici : depuis le 25/09/2026, c'est 80 % du bénéfice de la vente, l'hôtel en garde 20 % (taux fixé dans l'appli). Une ancienne colonne « Retenue » en H n'est plus lue : on peut la supprimer.
 
 ### Envoyer les prix à l'appli
 - Envoie en un seul passage : les prix coûtants des ingrédients codés, les boissons codées à leur prix équipe, et la carte de vente si l'onglet existe. **L'appli remplace toute sa liste** à chaque envoi.
 - Au retour, va chercher les ventes du snack et les écrit en bas du « Journal Snack », puis accuse réception. L'accusé part **après** l'écriture et ne porte que sur les lignes réellement écrites : une panne fait recommencer, jamais perdre.
-- **Ce qui l'arrête, avant que rien ne parte** : un code mal formé, un code en double, un code sans prix, un article de la carte dont le produit est introuvable ou sans prix de vente, une case Frites cochée sans ligne `menu_frites`, une retenue négative.
+- **Ce qui l'arrête, avant que rien ne parte** : un code mal formé, un code en double, un code sans prix, un article de la carte dont le produit est introuvable ou sans prix de vente, une case Frites cochée sans ligne `menu_frites`.
 
 ### Configurer l'envoi à l'appli
 - Enregistre `PRIX_SNACK_SECRET` dans les propriétés du script. Doit valoir exactement `IMPORT_PRIX_SNACK_SECRET` côté Supabase. Il n'est écrit dans aucun fichier du dépôt, et n'a pas à l'être.
@@ -242,7 +243,7 @@ Ressources : Sheets, `CarteAppli.js`, Edge Function `import-prix-snack`. **Rien 
 
 ### Ajouter un produit à la carte
 1. « Ajouter un produit », nom en ligne 2, quantités de la recette, prix de vente.
-2. « Carte appli » : une ligne — rubrique, article, nom exact du produit, cases Sauce/Frites, retenue si elle diffère de 5 DH.
+2. « Carte appli » : une ligne — rubrique, article, nom exact du produit, cases Sauce/Frites.
 3. Le **code** : à taper, en minuscules sans accent (`panini_thon`). C'est le dernier endroit où un code s'écrit encore à la main.
 4. Envoyer.
 
@@ -264,7 +265,7 @@ l'article disparaît de l'écran de vente. Les ventes déjà faites restent dans
 **Le temps d'une rupture** — effacer **l'article (B) et le code (F)**, et
 garder le reste de la ligne. Elle devient invisible pour le script, prête à
 être re-remplie. Notez le code dans une colonne libre à droite (à partir de I,
-avec n'importe quel titre sauf `Retenue`) : au retour, l'article doit reprendre
+avec n'importe quel titre) : au retour, l'article doit reprendre
 **exactement le même**.
 
 **Retirer le produit lui-même** (la boisson ou la colonne de « Cout par item »)
@@ -317,7 +318,6 @@ Onglet « Carte appli », une ligne :
 | D, E | Sauce, Frites | décochés |
 | F | Code — minuscules, chiffres ou `_`, 2 à 30 signes, jamais utilisé ailleurs dans cette colonne | `sprite` |
 | G | Prix envoyé | **laisser vide**, le script l'écrit |
-| H | Retenue | `1` pour une boisson |
 
 Ces codes-là sont indépendants de ceux de « Code équipe » : ce sont deux listes
 séparées, et le même mot peut servir dans les deux.
@@ -371,10 +371,27 @@ pas corrigé.
 **Rien à coder.** À surveiller : un coût de revient à 0 signale une recette incomplète, pas un produit gratuit.
 
 ### Changer la prime des vendeurs
-1. « Carte appli », colonne « Retenue » : plus de retenue = moins de prime.
-2. Envoyer.
+Depuis le 25/09/2026, l'hôtel prend **20 % du bénéfice** de chaque vente, le
+vendeur garde le reste. Le taux est dans l'appli (`snack_commission_hotel()`,
+base KasbahCalendar) : le changer, c'est réécrire cette seule fonction. Chaque
+vente garde le taux du jour : les ventes passées ne bougent pas.
 
-**Rien à coder.** À savoir : sans coût de revient, l'appli ne donne aucune prime, et rien ne le signale au moment de la vente.
+Dans le « Journal Snack », chaque vente montre son calcul :
+
+| Colonne | Contenu |
+|---|---|
+| D Montant | total vendu |
+| J Cout | coût de revient de la vente (valeur de l'appli) |
+| K Benefice | `=D−J` |
+| L Commission hotel | 20 % (valeur de l'appli, figée à la vente) |
+| H Part vendeur | `=MAX(0; ARRONDI(K × (1 − L); 2))` |
+| I Part hotel | `=D−H` |
+
+Les ventes d'avant le 25/09/2026 n'ont ni coût ni taux : H et I y sont des
+valeurs, calculées avec l'ancienne retenue en dirhams.
+
+À savoir : sans coût de revient, l'article compte à son prix de vente — il ne
+rapporte rien au vendeur, et rien ne le signale au moment de la vente.
 
 ### Savoir ce que l'équipe doit
 **C'est dans l'appli, pas dans le classeur** : page Snack, et Admin → onglet
