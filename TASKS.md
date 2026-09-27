@@ -5,8 +5,8 @@
 - [ ] **Comptage des stocks** — suivre ce qui est acheté, vendu et consommé par l'équipe (les achats équipe sont déjà marqués `origine = 'equipe'` dans l'appli pour pouvoir les isoler)
 
 ## En cours
-- [ ] **Prime calculée dans le classeur : mise en service** — script poussé au classeur le 27/09/2026 ; il n'écrit rien tant que la base envoie l'ancien format. Dans l'ordre :
-  1. Karim exécute `20260927110000_snack_prime_au_classeur.sql` (KasbahCalendar, base de l'appli `tggdwwvdlrgncbntxkfs`, pas Kasbah Analytics).
+- [ ] **Prime calculée dans le classeur : mise en service** — script poussé au classeur et base migrée le 27/09/2026. Reste :
+  1. ~~Migration `20260927110000_snack_prime_au_classeur.sql`~~ : exécutée par Karim dans la base de l'appli le 27/09/2026, KasbahCalendar poussé.
   2. Menu Snack → « Envoyer les prix à l'appli » : vérifier la ligne « Part vendeur » sous le bloc de « Items & Sandwichs » (80 %), la colonne « Part vendeur » de « Boissons » (bière 0 %), et les colonnes « Coût revient » / « Part vendeur » de « Carte appli » (recherches par le nom ; case vide = nom introuvable, à corriger en colonne C).
   3. Régler les % voulus ; vérifier sur les ventes arrivées que H et I se calculent (une bière : H = 0).
   4. Renommer H1 « pour le vendeur » et I1 « pour l'hôtel » dans le Journal Snack (inversés à la main : H est la part du vendeur).
