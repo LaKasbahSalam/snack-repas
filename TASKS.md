@@ -5,14 +5,21 @@
 - [ ] **Comptage des stocks** — suivre ce qui est acheté, vendu et consommé par l'équipe (les achats équipe sont déjà marqués `origine = 'equipe'` dans l'appli pour pouvoir les isoler)
 
 ## En cours
-- [ ] **Journal Snack : réparer H22:H25 à la main** (`#ERROR!`, écrites avec l'ancienne formule) : en H22 `=(K22>0)*ARRONDI(100*K22*(1-L22))/100`, puis tirer jusqu'à H25 ; I suit d'elle-même. Vérifier à la prochaine vente que H et I se calculent seules — *27/09/2026*
-- [ ] **Commission de 20 % : finir la mise en service** — script poussé au classeur le 25/09/2026. Reste : confirmer que la migration `20260925100000` est passée dans la base de l'appli (`tggdwwvdlrgncbntxkfs`, pas Kasbah Analytics), une vente test (H du Journal Snack = prime affichée dans l'appli), puis supprimer la colonne H « Retenue » de l'onglet « Carte appli », qui n'est plus lue
+- [ ] **Prime calculée dans le classeur : mise en service** — script poussé au classeur le 27/09/2026 ; il n'écrit rien tant que la base envoie l'ancien format. Dans l'ordre :
+  1. Karim exécute `20260927110000_snack_prime_au_classeur.sql` (KasbahCalendar, base de l'appli `tggdwwvdlrgncbntxkfs`, pas Kasbah Analytics).
+  2. Menu Snack → « Envoyer les prix à l'appli » : vérifier la ligne « Part vendeur » sous le bloc de « Items & Sandwichs » (80 %), la colonne « Part vendeur » de « Boissons » (bière 0 %), et les colonnes « Coût revient » / « Part vendeur » de « Carte appli » (renvois, pas de case vide sauf article sans fiche).
+  3. Régler les % voulus ; vérifier sur les ventes arrivées que H et I se calculent (une bière : H = 0).
+  4. Renommer H1 « pour le vendeur » et I1 « pour l'hôtel » dans le Journal Snack (inversés à la main : H est la part du vendeur).
+  5. Supprimer la colonne H « Retenue » de « Carte appli » (plus lue) ; les colonnes de renvoi se recalent d'elles-mêmes au prochain envoi.
+- [ ] **Journal Snack : réparer H22:H25 à la main** (`#ERROR!`, anciennes lignes) : en H22 `=(K22>0)*ARRONDI(100*K22*(1-L22))/100`, puis tirer jusqu'à H25 ; I suit d'elle-même — *27/09/2026*
+- [ ] **À trancher par Karim** : les bières vendues du 25 au 26/09 ont donné une prime dans l'appli (91,20 et 45,60 à Ayoub, au moins) ; la reprendre ou non
 - [ ] **Page de ventes du snack dans l'appli KasbahCalendar** — onglet « Journal » de la page Snack écrit le 21/09/2026 (KasbahCalendar, non commité), reste à livrer et à vérifier connecté
 - [ ] Tenir à jour `docs/FICHE-TECHNIQUE.md` : ce que fait chaque bouton des quatre outils, et ce qu'il reste à coder (à relire à chaque nouveau bouton)
 - [ ] Compléter la Fiche repas : prix d'achat des nouveaux ingrédients et des boissons, quantités en jaune (tajines, fromage…), prix à aligner sur la carte
 - [ ] Proposer les boissons à l'équipe à 6 DH : onglet « Boissons », sélectionner les lignes, menu Snack → « Ajouter à la page Snack de l'équipe » (le script pose le code et le prix équipe)
 
 ## Fait
+- [x] Prime du vendeur calculée par le classeur seul (décision Karim : le classeur fait foi). Part vendeur en % du bénéfice, réglée par article : ligne « Part vendeur » de « Items & Sandwichs », colonne « Part vendeur » de « Boissons » (bière 0 %). « Carte appli » y renvoie (`PartVendeur.js`). Journal Snack : une ligne par article, faits en valeurs (code, quantité, prix payé), montant, coût, bénéfice, commission et parts en formules, sans séparateur. Tests : `parts.test.js`, `journal.test.js` réécrit. Script poussé au classeur (comparé avant, vérifié après) — 27/09/2026
 - [x] Journal Snack : la part vendeur (H) s'écrivait `=MAX(0,ROUND(…,2))`, refusée par le classeur en français (virgule = décimales) → `#ERROR!` sur H et I dès les premières ventes portant coût et taux (25-26/09). Formule réécrite sans séparateur, `=(K>0)*ROUND(100*K*(1-L))/100`, et un test qui interdit « , » et « ; » dans les formules du journal. Envoi relancé : ventes du 24 au 26/09 arrivées. Script poussé au classeur (comparé avant, vérifié après) — 27/09/2026
 - [x] Onglet « Cout par item » renommé « Items & Sandwichs » dans le classeur : le script cherchait l'ancien nom et l'envoi à l'appli s'arrêtait (« Onglet introuvable »), Journal Snack bloqué au 24/09. Nom changé dans le script, les tests et la fiche technique ; script poussé au classeur (clasp pull comparé avant : aucune modification en ligne ; vérifié après : en ligne = dépôt) — 27/09/2026
 - [x] Prime du vendeur : 80 % du bénéfice, l'hôtel en garde 20 % (au lieu de la retenue en DH). Journal Snack : colonnes J Cout, K Benefice, L Commission hotel ; H et I deviennent des formules sur ces cases pour les nouvelles ventes. La Carte appli n'envoie plus de retenue. Script poussé au classeur (clasp pull comparé : aucune modification en ligne) — 25/09/2026

@@ -1,39 +1,49 @@
 /**
- * Onglet « Journal Snack » : une ligne par vente faite dans l'appli.
+ * Onglet « Journal Snack » : une ligne par article vendu dans l'appli.
  *
- *   A Id                    identifiant de la vente dans l'appli
+ * Décision Karim du 27/09/2026 : le classeur seul fait foi. L'appli
+ * n'envoie que les faits de la vente ; tout ce qui se calcule est une
+ * formule, qui va chercher le coût et la part du vendeur dans « Carte
+ * appli » (renvois vers « Items & Sandwichs » et « Boissons », voir
+ * PartVendeur.js).
+ *
+ *   A Id                    numéro de la vente dans l'appli (le même pour
+ *                           chacun de ses articles)
  *   B Date                  jour de la vente (heure de Fès)
- *   C Description           ce qui a été vendu, à qui, par qui
- *   D Montant               total vendu, prime du vendeur comprise
+ *   C Description           l'article, à qui, par qui
+ *   D Montant               formule =N×O
  *   E Montant total cumulé  formule, cumul de la colonne D
  *   F Client                à qui (nom de la fiche, ou « pas dans la liste »)
  *   G Vendeur               pseudo de qui a vendu
- *   H Part vendeur          sa prime : formule =(K>0)*ROUND(100×K×(1−L))/100
- *   I Part hôtel            le reste : formule =D−H
- *   J Cout                  coût de revient de la vente, frites comprises
+ *   H Part vendeur          formule =(K>0)*ROUND(100×K×(1−L))/100
+ *   I Part hôtel            formule =D−H
+ *   J Cout                  formule =N×(coût de l'article, + frites)
  *   K Benefice              formule =D−J
- *   L Commission hotel      part du bénéfice gardée par l'hôtel (20 %)
+ *   L Commission hotel      formule =1−part vendeur de l'article
+ *   M Code                  code de l'article dans l'appli
+ *   N Quantite              combien
+ *   O Prix unitaire         prix payé à la pièce, frites comprises
  *
- * F à I depuis le 21/09/2026, J à L depuis le 25/09/2026, à la fin pour ne
- * rien déplacer. Tant que la base ne les envoie pas, elles restent vides :
- * le script ne casse pas.
+ * Les colonnes A à L gardent leur place d'avant (les onglets qui les
+ * lisent, comme « Snack/mois », continuent de marcher) ; M à O s'ajoutent.
+ * Les lignes d'avant le 27/09 restent telles qu'elles ont été écrites.
  *
- * H et I sont des formules sur J et L, pour qu'on voie sur chaque vente
- * comment la commission s'applique. J et L sont figés au jour de la vente
- * par l'appli : changer le taux plus tard ne réécrit pas les lignes
- * passées. L'appli fait le même calcul et crédite la prime au vendeur ;
- * si l'on corrige D ou J à la main, H suit la formule mais le solde du
- * vendeur dans l'appli, lui, ne bouge pas.
+ * Les formules sont vivantes : changer un coût ou une part vendeur dans
+ * « Items & Sandwichs » ou « Boissons » change aussi les lignes passées.
+ * Seul cas figé : un article dont le coût est inconnu au moment de
+ * l'écriture (ou absent de « Carte appli ») a J = D, donc un bénéfice nul
+ * et aucune part pour le vendeur, comme avant.
  *
- * Vente d'avant le 25/09/2026 (ou base pas encore migrée) : pas de coût
- * ni de taux, H et I sont alors les valeurs calculées par l'appli.
+ * Aucune formule n'a de « , » ni de « ; » : le séparateur d'arguments
+ * dépend de la langue du classeur, et le mauvais donne #ERROR!
+ * (27/09/2026).
  *
  * Le sens est un TIRAGE, comme pour la caisse du classeur Exercices :
  * c'est ce script qui demande les ventes à l'appli, les écrit, puis
  * accuse réception. L'appli n'écrit jamais dans le classeur — pas de
  * compte de service Google, pas de clé privée à garder.
  *
- * L'accusé part APRÈS l'écriture, et ne porte que sur les lignes
+ * L'accusé part APRÈS l'écriture, et ne porte que sur les ventes
  * réellement écrites. Si l'écriture échoue, rien n'est marqué et le
  * passage suivant les reproposera. L'inverse les perdrait.
  *
@@ -47,7 +57,8 @@
 
 const FEUILLE_JOURNAL = 'Journal Snack';
 const ENTETES_JOURNAL = ['Id', 'Date', 'Description', 'Montant', 'Montant total cumule',
-  'Client', 'Vendeur', 'Part vendeur', 'Part hotel', 'Cout', 'Benefice', 'Commission hotel'];
+  'Client', 'Vendeur', 'Part vendeur', 'Part hotel', 'Cout', 'Benefice', 'Commission hotel',
+  'Code', 'Quantite', 'Prix unitaire'];
 
 /**
  * Va chercher les ventes et les écrit. Rend le nombre de lignes ajoutées.
@@ -59,8 +70,16 @@ function tirerVentesSnack_(secret) {
     const j = SpreadsheetApp.getActive().getSheetByName(FEUILLE_JOURNAL);
     if (!j) return 0; // onglet absent : rien à faire, l'envoi des prix continue.
 
-    const ventes = demanderVentes_(secret);
-    if (ventes.length === 0) return 0;
+    const lignes = demanderVentes_(secret);
+    if (lignes.length === 0) return 0;
+    // Base pas encore migrée (une ligne par vente, avec la prime de
+    // l'appli) : rien n'est écrit ni accusé, les ventes attendent.
+    if (!('code' in lignes[0])) {
+      console.error('Journal Snack : la base envoie encore l\'ancien format, '
+        + 'exécuter 20260927110000_snack_prime_au_classeur.sql');
+      return 0;
+    }
+    const carte = carteDuJournal_();
 
     // Ligne d'en-tête si l'onglet est vierge ; sur un onglet plus ancien,
     // seules les en-têtes manquantes à partir de F sont posées.
@@ -84,67 +103,94 @@ function tirerVentesSnack_(secret) {
       j.getRange(2, 1, j.getLastRow() - 1, 1).getValues()
         .forEach((l) => { if (l[0] !== '') deja[String(l[0]).trim()] = true; });
     }
-    const aEcrire = ventes.filter((v) => !deja[String(v.id)]);
+    const ids = (ls) => ls.map((l) => l.id).filter((id, i, t) => t.indexOf(id) === i);
+    const aEcrire = lignes.filter((l) => !deja[String(l.id)]);
     if (aEcrire.length === 0) {
-      accuserVentes_(secret, ventes.map((v) => v.id)); // déjà là : on les marque.
+      accuserVentes_(secret, ids(lignes)); // déjà là : on les marque.
       return 0;
     }
 
+    // Les faits : ce que l'appli sait de la vente.
     const depart = j.getLastRow() + 1;
-    j.getRange(depart, 1, aEcrire.length, 4).setValues(aEcrire.map((v) => [
-      v.id,
-      jourDe_(v.date_vente),
-      String(v.description || '').slice(0, 500),
-      Number(v.montant) || 0,
+    const n = aEcrire.length;
+    j.getRange(depart, 1, n, 3).setValues(aEcrire.map((l) => [
+      l.id,
+      jourDe_(l.date_vente),
+      String(l.description || '').slice(0, 500),
     ]));
-    j.getRange(depart, 2, aEcrire.length, 1).setNumberFormat('dd/mm/yyyy');
-    j.getRange(depart, 4, aEcrire.length, 1).setNumberFormat('0.00');
-    // Cumul : la première ligne part de zéro, les suivantes s'appuient sur
-    // la ligne du dessus. Une formule et non une valeur, pour qu'une
-    // correction à la main se répercute.
-    j.getRange(depart, 5, aEcrire.length, 1).setFormulas(aEcrire.map((_, i) => {
-      const r = depart + i;
-      return [r === 2 ? `=D${r}` : `=N(E${r - 1})+D${r}`];
-    }));
-    j.getRange(depart, 5, aEcrire.length, 1).setNumberFormat('0.00');
+    j.getRange(depart, 6, n, 2).setValues(aEcrire.map((l) => [
+      String(l.client || '').slice(0, 200),
+      String(l.vendeur || '').slice(0, 50),
+    ]));
+    j.getRange(depart, 13, n, 3).setValues(aEcrire.map((l) => [
+      String(l.code || ''),
+      Number(l.quantite) || 0,
+      Number(l.prix_unitaire) || 0,
+    ]));
 
-    // F à L : qui, le partage, et de quoi il se calcule. Vides si la base
-    // ne les envoie pas encore.
-    const nombre = (x) => (x === undefined || x === null || x === '' ? '' : Number(x) || 0);
-    const calculable = (v) => nombre(v.cout) !== '' && nombre(v.commission_hotel) !== '';
-    j.getRange(depart, 6, aEcrire.length, 7).setValues(aEcrire.map((v) => [
-      String(v.client || '').slice(0, 200),
-      String(v.vendeur || '').slice(0, 50),
-      nombre(v.part_vendeur),
-      nombre(v.part_hotel),
-      calculable(v) ? nombre(v.cout) : '',
-      '',
-      calculable(v) ? nombre(v.commission_hotel) / 100 : '',
-    ]));
-    // Le partage en formules, sur les ventes qui portent coût et taux.
-    // Aucune virgule ni point-virgule : le séparateur d'arguments dépend de
-    // la langue du classeur (« , » en anglais, « ; » en français), et une
-    // formule écrite avec le mauvais donne #ERROR! (27/09/2026). D'où
-    // (K>0)*… pour MAX(0; …) et ROUND(100×…)/100 pour ARRONDI(…; 2).
-    aEcrire.forEach((v, i) => {
-      if (!calculable(v)) return;
+    // Le reste : des formules.
+    const C = `'${FEUILLE_CARTE}'!`;
+    j.getRange(depart, 4, n, 2).setFormulas(aEcrire.map((_, i) => {
       const r = depart + i;
-      j.getRange(r, 8, 1, 2).setFormulas([[`=(K${r}>0)*ROUND(100*K${r}*(1-L${r}))/100`, `=D${r}-H${r}`]]);
-      j.getRange(r, 11).setFormula(`=D${r}-J${r}`);
-    });
-    j.getRange(depart, 8, aEcrire.length, 4).setNumberFormat('0.00');
-    j.getRange(depart, 12, aEcrire.length, 1).setNumberFormat('0%');
+      return [`=N${r}*O${r}`, r === 2 ? `=D${r}` : `=N(E${r - 1})+D${r}`];
+    }));
+    j.getRange(depart, 8, n, 5).setFormulas(aEcrire.map((l, i) => {
+      const r = depart + i;
+      const article = carte.lignes[l.code];
+      const frites = carte.lignes[CODE_SUPPLEMENT_FRITES];
+      const coutConnu = article && article.coutConnu && (!l.avec_frites || (frites && frites.coutConnu));
+      const cout = !coutConnu ? `=D${r}`
+        : l.avec_frites ? `=N${r}*(${C}${carte.cout}${article.ligne}+${C}${carte.cout}${frites.ligne})`
+          : `=N${r}*${C}${carte.cout}${article.ligne}`;
+      return [
+        `=(K${r}>0)*ROUND(100*K${r}*(1-L${r}))/100`,
+        `=D${r}-H${r}`,
+        cout,
+        `=D${r}-J${r}`,
+        article ? `=1-${C}${carte.part}${article.ligne}` : '=1',
+      ];
+    }));
+    j.getRange(depart, 2, n, 1).setNumberFormat('dd/mm/yyyy');
+    j.getRange(depart, 4, n, 2).setNumberFormat('0.00');
+    j.getRange(depart, 8, n, 4).setNumberFormat('0.00');
+    j.getRange(depart, 12, n, 1).setNumberFormat('0%');
+    j.getRange(depart, 15, n, 1).setNumberFormat('0.00');
 
     // Écrit pour de bon avant d'accuser réception : si le script s'arrête
     // ici (temps dépassé), les lignes sont dans l'onglet et l'accusé
     // repartira au prochain passage, le doublon étant écarté par `deja`.
     SpreadsheetApp.flush();
-    accuserVentes_(secret, aEcrire.map((v) => v.id));
-    return aEcrire.length;
+    accuserVentes_(secret, ids(aEcrire));
+    return n;
   } catch (e) {
     console.error(`Journal Snack : ${e.message}`);
     return 0;
   }
+}
+
+/**
+ * « Carte appli » vue par le Journal : la lettre des colonnes « Coût
+ * revient » et « Part vendeur », et pour chaque code sa ligne et si son
+ * coût est connu. Lève si les colonnes manquent : rien n'est alors écrit
+ * ni accusé.
+ */
+function carteDuJournal_() {
+  const c = SpreadsheetApp.getActive().getSheetByName(FEUILLE_CARTE);
+  if (!c || c.getLastRow() < 2) throw new Error(`onglet « ${FEUILLE_CARTE} » absent ou vide.`);
+  const entetes = c.getRange(1, 1, 1, c.getLastColumn()).getValues()[0].map((e) => String(e).trim());
+  const colCode = entetes.indexOf('Code') + 1;
+  const colCout = entetes.indexOf(ENTETE_COUT_CARTE) + 1;
+  const colPart = entetes.indexOf(LIBELLE_PART) + 1;
+  if (!colCode || !colCout || !colPart) {
+    throw new Error(`« ${FEUILLE_CARTE} » sans colonnes Code, ${ENTETE_COUT_CARTE} et ${LIBELLE_PART}.`);
+  }
+  const lignes = {};
+  c.getRange(2, 1, c.getLastRow() - 1, c.getLastColumn()).getValues().forEach((l, i) => {
+    const code = String(l[colCode - 1]).trim();
+    const cout = l[colCout - 1];
+    if (code && !lignes[code]) lignes[code] = { ligne: i + 2, coutConnu: typeof cout === 'number' && cout > 0 };
+  });
+  return { cout: lettre_(colCout), part: lettre_(colPart), lignes };
 }
 
 /** Les ventes que l'onglet n'a pas encore. */

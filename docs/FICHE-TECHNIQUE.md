@@ -371,27 +371,40 @@ pas corrigé.
 **Rien à coder.** À surveiller : un coût de revient à 0 signale une recette incomplète, pas un produit gratuit.
 
 ### Changer la prime des vendeurs
-Depuis le 25/09/2026, l'hôtel prend **20 % du bénéfice** de chaque vente, le
-vendeur garde le reste. Le taux est dans l'appli (`snack_commission_hotel()`,
-base KasbahCalendar) : le changer, c'est réécrire cette seule fonction. Chaque
-vente garde le taux du jour : les ventes passées ne bougent pas.
+**Tout se règle dans le classeur** (décision du 27/09/2026) : la part du
+vendeur, en % du bénéfice de l'article, est
 
-Dans le « Journal Snack », chaque vente montre son calcul :
+- dans « Items & Sandwichs », ligne **« Part vendeur »** (sous le bloc de
+  calcul), une case par produit ;
+- dans « Boissons », colonne **« Part vendeur »** (bière : 0 %).
+
+Elles sont créées à 80 % au premier envoi, puis jamais réécrites. Changer
+une case, c'est tout : le Journal Snack suit, **lignes passées comprises**
+(ce sont des formules). L'appli ne calcule plus de prime.
+
+« Carte appli » porte deux colonnes de renvoi, **« Coût revient »** et
+**« Part vendeur »** (`='Items & Sandwichs'!H12`…), refaites à chaque envoi :
+ne pas les remplir à la main.
+
+Dans le « Journal Snack », une ligne par article vendu :
 
 | Colonne | Contenu |
 |---|---|
-| D Montant | total vendu |
-| J Cout | coût de revient de la vente (valeur de l'appli) |
-| K Benefice | `=D−J` |
-| L Commission hotel | 20 % (valeur de l'appli, figée à la vente) |
-| H Part vendeur | `=(K > 0) × ROUND(100 × K × (1 − L)) / 100` (0 si la vente ne rapporte rien ; écrite sans séparateur pour marcher quelle que soit la langue du classeur) |
+| A Id | numéro de la vente (le même pour tous ses articles) |
+| D Montant | `=N×O` |
+| H Part vendeur | `=(K > 0) × ROUND(100 × K × (1 − L)) / 100` |
 | I Part hotel | `=D−H` |
+| J Cout | `=N × coût de l'article dans « Carte appli »` (+ celui des frites) |
+| K Benefice | `=D−J` |
+| L Commission hotel | `=1 − part vendeur de l'article dans « Carte appli »` |
+| M Code, N Quantite, O Prix unitaire | les faits envoyés par l'appli |
 
-Les ventes d'avant le 25/09/2026 n'ont ni coût ni taux : H et I y sont des
-valeurs, calculées avec l'ancienne retenue en dirhams.
+Aucune formule n'a de « , » ni de « ; » : elles marchent quelle que soit la
+langue du classeur.
 
-À savoir : sans coût de revient, l'article compte à son prix de vente — il ne
-rapporte rien au vendeur, et rien ne le signale au moment de la vente.
+À savoir : un article sans coût de revient (ou absent de « Carte appli ») au
+moment de la vente est écrit avec J = D : bénéfice nul, rien pour le vendeur.
+Les ventes d'avant le 27/09/2026 restent telles qu'elles ont été écrites.
 
 ### Savoir ce que l'équipe doit
 **C'est dans l'appli, pas dans le classeur** : page Snack, et Admin → onglet

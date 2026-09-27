@@ -30,6 +30,10 @@ class FausseFeuille {
   setFrozenRows(n) { this.lignesGelees = n; return this; }
   setColumnWidth() { return this; }
   insertColumnsAfter() { return this; }
+  insertRowsAfter(_apres, n) {
+    for (let i = 0; i < n; i++) this.g.push(Array.from({ length: this.g[0].length }, () => ""));
+    return this;
+  }
   getLastRow() {
     for (let r = this.g.length - 1; r >= 0; r--) if (this.g[r].some((v) => v !== "")) return r + 1;
     return 0;

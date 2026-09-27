@@ -105,6 +105,10 @@ function envoyerPrix_() {
     throw new Error(`l'appli a répondu ${rep.getResponseCode()} : ${corps}`);
   }
   noterPrixEnvoyes_(carte);
+  // Coût et part du vendeur de chaque article, que lisent les formules du
+  // Journal Snack (PartVendeur.js). Avant les ventes : sans eux, une ligne
+  // serait écrite avec un bénéfice nul.
+  preparerPartsVendeur_();
   // Retour : les ventes du snack pour le « Journal Snack ». Jamais bloquant
   // — l'envoi des prix est déjà fait et ne doit pas être remis en cause.
   const ventes = tirerVentesSnack_(secret);

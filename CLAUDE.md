@@ -42,6 +42,7 @@ cd script
 node tests/carte.test.js      # ce que lireCarte_() envoie à l'appli
 node tests/journal.test.js    # ce que tirerVentesSnack_() écrit dans le journal
 node tests/envoi.test.js      # les boissons proposées à l'équipe, et ce qui les bloque
+node tests/parts.test.js      # la part du vendeur réglable par article, et les renvois de Carte appli
 ```
 
 `tests/faux-sheets.js` est un faux Google Sheets : une grille de valeurs et
@@ -62,13 +63,17 @@ Tout passe par une seule Edge Function, `import-prix-snack` :
   boissons (colonne « Prix équipe » de l'onglet « Boissons », 6 DH par défaut :
   une boisson n'est pas cédée à son prix d'achat), et la carte de
   vente (onglet « Carte appli ») avec le prix de revient de chaque article.
-  La prime du vendeur est 80 % du bénéfice de la vente ; l'hôtel en garde
-  20 % (taux fixé dans l'appli, `snack_commission_hotel()`, depuis le
-  25/09/2026).
 - **Le classeur vient chercher** les ventes faites dans l'appli et les écrit
-  dans l'onglet « Journal Snack », puis accuse réception. Chaque vente y
-  porte son coût et son taux, et le partage vendeur / hôtel y est une
-  formule sur ces cases.
+  dans l'onglet « Journal Snack », une ligne par article, puis accuse
+  réception. L'appli n'envoie que les faits (code, quantité, prix payé,
+  client, vendeur).
+- **La prime du vendeur se calcule ici, et nulle part ailleurs** (décision
+  Karim, 27/09/2026) : sa part, en % du bénéfice, se règle par article —
+  ligne « Part vendeur » de « Items & Sandwichs », colonne « Part vendeur »
+  de « Boissons » (bière : 0 %). « Carte appli » y renvoie (colonnes
+  « Coût revient » et « Part vendeur », `PartVendeur.js`), et le Journal
+  Snack calcule tout en formules. La base de l'appli ne calcule plus de
+  prime : ne jamais y remettre une règle de calcul.
 
 L'appli n'écrit **jamais** dans le classeur : pas de compte de service
 Google, pas de clé privée à protéger. Le classeur demande, l'appli répond.

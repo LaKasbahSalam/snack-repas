@@ -48,7 +48,7 @@ function envoyer(lignesBoissons, entetes = ["Boisson", "Prix d'achat", "Prix de 
     "Boissons": new FausseFeuille(boissons),
   }, () => ({ code: 200, corps: '{"produits":0}' }));
   vm.createContext(ctx);
-  for (const f of ["Snack.js", "Carte.js", "Boissons.js", "CarteAppli.js", "JournalSnack.js", "Envoi.js"]) {
+  for (const f of ["Snack.js", "Carte.js", "Boissons.js", "CarteAppli.js", "PartVendeur.js", "JournalSnack.js", "Envoi.js"]) {
     vm.runInContext(fs.readFileSync(path.join(SCRIPT, f), "utf8"), ctx, { filename: f });
   }
   try {
@@ -143,7 +143,7 @@ function ajouter(lignesBoissons, { debut = 2, nb = 1, reponse = "", confirme = t
     alert: () => (confirme ? "ok" : "annule"),
   });
   vm.createContext(ctx);
-  for (const f of ["Snack.js", "Carte.js", "Boissons.js", "CarteAppli.js", "JournalSnack.js", "Envoi.js"]) {
+  for (const f of ["Snack.js", "Carte.js", "Boissons.js", "CarteAppli.js", "PartVendeur.js", "JournalSnack.js", "Envoi.js"]) {
     vm.runInContext(fs.readFileSync(path.join(SCRIPT, f), "utf8"), ctx, { filename: f });
   }
   ctx.__b = b;
