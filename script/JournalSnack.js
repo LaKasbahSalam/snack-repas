@@ -3,9 +3,12 @@
  *
  * Décision Karim du 27/09/2026 : le classeur seul fait foi. L'appli
  * n'envoie que les faits de la vente ; tout ce qui se calcule est une
- * formule, qui va chercher le coût et la part du vendeur dans « Carte
- * appli » (renvois vers « Items & Sandwichs » et « Boissons », voir
- * PartVendeur.js).
+ * formule, qui va chercher l'article PAR SON CODE (colonne M) dans « Carte
+ * appli », dont les colonnes « Coût revient » et « Part vendeur »
+ * cherchent à leur tour dans « Items & Sandwichs » et « Boissons » (voir
+ * PartVendeur.js). Aucun renvoi vers une ligne fixe : trier ou déplacer
+ * « Carte appli » ne casse rien, et la même formule sert à toutes les
+ * lignes (tirer vers le bas suffit).
  *
  *   A Id                    numéro de la vente dans l'appli (le même pour
  *                           chacun de ses articles)
@@ -15,28 +18,29 @@
  *   E Montant total cumulé  formule, cumul de la colonne D
  *   F Client                à qui (nom de la fiche, ou « pas dans la liste »)
  *   G Vendeur               pseudo de qui a vendu
- *   H Part vendeur          formule =(K>0)*ROUND(100×K×(1−L))/100
+ *   H Part vendeur          formule =MAX(0;ARRONDI(K×(1−L);2))
  *   I Part hôtel            formule =D−H
- *   J Cout                  formule =N×(coût de l'article, + frites)
+ *   J Cout                  formule =N×(coût de l'article + frites si P) ;
+ *                           coût vide ou nul : =D, bénéfice nul
  *   K Benefice              formule =D−J
- *   L Commission hotel      formule =1−part vendeur de l'article
+ *   L Commission hotel      formule =1−part vendeur de l'article ;
+ *                           article introuvable : 100 %, rien au vendeur
  *   M Code                  code de l'article dans l'appli
  *   N Quantite              combien
  *   O Prix unitaire         prix payé à la pièce, frites comprises
+ *   P Frites                VRAI si l'article est pris avec frites
  *
  * Les colonnes A à L gardent leur place d'avant (les onglets qui les
- * lisent, comme « Snack/mois », continuent de marcher) ; M à O s'ajoutent.
+ * lisent, comme « Snack/mois », continuent de marcher) ; M à P s'ajoutent.
  * Les lignes d'avant le 27/09 restent telles qu'elles ont été écrites.
  *
  * Les formules sont vivantes : changer un coût ou une part vendeur dans
- * « Items & Sandwichs » ou « Boissons » change aussi les lignes passées.
- * Seul cas figé : un article dont le coût est inconnu au moment de
- * l'écriture (ou absent de « Carte appli ») a J = D, donc un bénéfice nul
- * et aucune part pour le vendeur, comme avant.
+ * « Items & Sandwichs » ou « Boissons » change aussi les lignes passées,
+ * et un coût ajouté après coup corrige les ventes où il manquait.
  *
- * Aucune formule n'a de « , » ni de « ; » : le séparateur d'arguments
- * dépend de la langue du classeur, et le mauvais donne #ERROR!
- * (27/09/2026).
+ * Les formules sont écrites avec le séparateur de la langue du classeur
+ * (« ; » en français), détecté par separateur_() : le mauvais donne
+ * #ERROR! (27/09/2026).
  *
  * Le sens est un TIRAGE, comme pour la caisse du classeur Exercices :
  * c'est ce script qui demande les ventes à l'appli, les écrit, puis
@@ -58,7 +62,7 @@
 const FEUILLE_JOURNAL = 'Journal Snack';
 const ENTETES_JOURNAL = ['Id', 'Date', 'Description', 'Montant', 'Montant total cumule',
   'Client', 'Vendeur', 'Part vendeur', 'Part hotel', 'Cout', 'Benefice', 'Commission hotel',
-  'Code', 'Quantite', 'Prix unitaire'];
+  'Code', 'Quantite', 'Prix unitaire', 'Frites'];
 
 /**
  * Va chercher les ventes et les écrit. Rend le nombre de lignes ajoutées.
@@ -122,32 +126,32 @@ function tirerVentesSnack_(secret) {
       String(l.client || '').slice(0, 200),
       String(l.vendeur || '').slice(0, 50),
     ]));
-    j.getRange(depart, 13, n, 3).setValues(aEcrire.map((l) => [
+    j.getRange(depart, 13, n, 4).setValues(aEcrire.map((l) => [
       String(l.code || ''),
       Number(l.quantite) || 0,
       Number(l.prix_unitaire) || 0,
+      l.avec_frites === true,
     ]));
 
-    // Le reste : des formules.
+    // Le reste : des formules, les mêmes sur chaque ligne au numéro près.
+    SEP = separateur_(j);
     const C = `'${FEUILLE_CARTE}'!`;
+    const colonne = (l) => `${C}$${l}:$${l}`;
+    const chercher = (quoi, code) => `INDEX(${colonne(quoi)},MATCH(${code},${colonne(carte.code)},0))`;
     j.getRange(depart, 4, n, 2).setFormulas(aEcrire.map((_, i) => {
       const r = depart + i;
       return [`=N${r}*O${r}`, r === 2 ? `=D${r}` : `=N(E${r - 1})+D${r}`];
     }));
-    j.getRange(depart, 8, n, 5).setFormulas(aEcrire.map((l, i) => {
+    j.getRange(depart, 8, n, 5).setFormulas(aEcrire.map((_, i) => {
       const r = depart + i;
-      const article = carte.lignes[l.code];
-      const frites = carte.lignes[CODE_SUPPLEMENT_FRITES];
-      const coutConnu = article && article.coutConnu && (!l.avec_frites || (frites && frites.coutConnu));
-      const cout = !coutConnu ? `=D${r}`
-        : l.avec_frites ? `=N${r}*(${C}${carte.cout}${article.ligne}+${C}${carte.cout}${frites.ligne})`
-          : `=N${r}*${C}${carte.cout}${article.ligne}`;
       return [
-        `=(K${r}>0)*ROUND(100*K${r}*(1-L${r}))/100`,
+        fx_(`=MAX(0,ROUND(K${r}*(1-L${r}),2))`),
         `=D${r}-H${r}`,
-        cout,
+        fx_(`=LET(cout_article,N(IFERROR(${chercher(carte.cout, `M${r}`)},0)),`
+          + `cout_frites,N(IFERROR(${chercher(carte.cout, `"${CODE_SUPPLEMENT_FRITES}"`)},0)),`
+          + `IF(OR(cout_article<=0,AND(P${r},cout_frites<=0)),D${r},N${r}*(cout_article+IF(P${r},cout_frites,0))))`),
         `=D${r}-J${r}`,
-        article ? `=1-${C}${carte.part}${article.ligne}` : '=1',
+        fx_(`=IFERROR(1-${chercher(carte.part, `M${r}`)},1)`),
       ];
     }));
     j.getRange(depart, 2, n, 1).setNumberFormat('dd/mm/yyyy');
@@ -169,28 +173,21 @@ function tirerVentesSnack_(secret) {
 }
 
 /**
- * « Carte appli » vue par le Journal : la lettre des colonnes « Coût
- * revient » et « Part vendeur », et pour chaque code sa ligne et si son
- * coût est connu. Lève si les colonnes manquent : rien n'est alors écrit
- * ni accusé.
+ * « Carte appli » vue par le Journal : la lettre des colonnes Code, « Coût
+ * revient » et « Part vendeur ». Lève si l'une manque : rien n'est alors
+ * écrit ni accusé.
  */
 function carteDuJournal_() {
   const c = SpreadsheetApp.getActive().getSheetByName(FEUILLE_CARTE);
   if (!c || c.getLastRow() < 2) throw new Error(`onglet « ${FEUILLE_CARTE} » absent ou vide.`);
   const entetes = c.getRange(1, 1, 1, c.getLastColumn()).getValues()[0].map((e) => String(e).trim());
-  const colCode = entetes.indexOf('Code') + 1;
-  const colCout = entetes.indexOf(ENTETE_COUT_CARTE) + 1;
-  const colPart = entetes.indexOf(LIBELLE_PART) + 1;
-  if (!colCode || !colCout || !colPart) {
+  const code = entetes.indexOf('Code') + 1;
+  const cout = entetes.indexOf(ENTETE_COUT_CARTE) + 1;
+  const part = entetes.indexOf(LIBELLE_PART) + 1;
+  if (!code || !cout || !part) {
     throw new Error(`« ${FEUILLE_CARTE} » sans colonnes Code, ${ENTETE_COUT_CARTE} et ${LIBELLE_PART}.`);
   }
-  const lignes = {};
-  c.getRange(2, 1, c.getLastRow() - 1, c.getLastColumn()).getValues().forEach((l, i) => {
-    const code = String(l[colCode - 1]).trim();
-    const cout = l[colCout - 1];
-    if (code && !lignes[code]) lignes[code] = { ligne: i + 2, coutConnu: typeof cout === 'number' && cout > 0 };
-  });
-  return { cout: lettre_(colCout), part: lettre_(colPart), lignes };
+  return { code: lettre_(code), cout: lettre_(cout), part: lettre_(part) };
 }
 
 /** Les ventes que l'onglet n'a pas encore. */

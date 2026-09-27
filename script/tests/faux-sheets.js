@@ -67,7 +67,12 @@ class FausseFeuille {
       setFormula: (x) => api.setFormulas([[x]]),
       // Mise en forme : acceptée et ignorée.
       setNumberFormat: () => api, setBackground: () => api, setFontWeight: () => api,
-      setFontColor: () => api, clearContent: () => api, insertCheckboxes: () => api,
+      setFontColor: () => api, insertCheckboxes: () => api,
+      isBlank: () => api.getValues().every((l) => l.every((v) => v === "")),
+      clearContent: () => {
+        for (let i = 0; i < nr; i++) for (let j = 0; j < nc; j++) if (g[r - 1 + i]) g[r - 1 + i][c - 1 + j] = "";
+        return api;
+      },
     };
     return api;
   }

@@ -70,9 +70,10 @@ Tout passe par une seule Edge Function, `import-prix-snack` :
 - **La prime du vendeur se calcule ici, et nulle part ailleurs** (décision
   Karim, 27/09/2026) : sa part, en % du bénéfice, se règle par article —
   ligne « Part vendeur » de « Items & Sandwichs », colonne « Part vendeur »
-  de « Boissons » (bière : 0 %). « Carte appli » y renvoie (colonnes
-  « Coût revient » et « Part vendeur », `PartVendeur.js`), et le Journal
-  Snack calcule tout en formules. La base de l'appli ne calcule plus de
+  de « Boissons » (bière : 0 %). « Carte appli » les cherche par le nom
+  (colonnes « Coût revient » et « Part vendeur », `PartVendeur.js`), le
+  Journal Snack cherche dans « Carte appli » par le code et calcule tout en
+  formules : aucun renvoi vers une ligne fixe. La base de l'appli ne calcule plus de
   prime : ne jamais y remettre une règle de calcul.
 
 L'appli n'écrit **jamais** dans le classeur : pas de compte de service

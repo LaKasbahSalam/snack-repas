@@ -52,7 +52,7 @@ function carte() {
 }
 
 /** Fait tourner un tirage et rend ce qui s'est passé. */
-function tirer({ lignes = LIGNES, journal = grilleVide(12, 15), grilleCarte = carte(), accuseEchoue = false } = {}) {
+function tirer({ lignes = LIGNES, journal = grilleVide(12, 16), grilleCarte = carte(), accuseEchoue = false } = {}) {
   const feuille = new FausseFeuille(journal);
   const feuilles = { "Journal Snack": feuille };
   if (grilleCarte) feuilles["Carte appli"] = new FausseFeuille(grilleCarte);
@@ -74,8 +74,8 @@ function tirer({ lignes = LIGNES, journal = grilleVide(12, 15), grilleCarte = ca
 let r = tirer();
 verifier(r.ecrites === 3, "3 articles écrits (2 ventes)", r.ecrites);
 verifier(r.grille[0].join("|") === "Id|Date|Description|Montant|Montant total cumule|Client|Vendeur|"
-  + "Part vendeur|Part hotel|Cout|Benefice|Commission hotel|Code|Quantite|Prix unitaire",
-  "en-têtes posées sur un onglet vierge, M à O en plus", r.grille[0].join(" | "));
+  + "Part vendeur|Part hotel|Cout|Benefice|Commission hotel|Code|Quantite|Prix unitaire|Frites",
+  "en-têtes posées sur un onglet vierge, M à P en plus", r.grille[0].join(" | "));
 verifier(r.grille[1][0] === 2 && r.grille[2][0] === 2 && r.grille[3][0] === 3,
   "numéro de la vente répété sur chacun de ses articles", `${r.grille[1][0]} ${r.grille[2][0]} ${r.grille[3][0]}`);
 verifier(typeof r.grille[1][1].getDate === "function" && r.grille[1][1].getDate() === 20 && r.grille[1][1].getMonth() === 8,
@@ -84,44 +84,50 @@ verifier(r.grille[1][5] === "Alice" && r.grille[1][6] === "momo"
   && r.grille[1][12] === "panini_kefta" && r.grille[1][13] === 2 && r.grille[1][14] === 50,
   "faits en valeurs : client, vendeur, code, quantité, prix payé", r.grille[1].join(" | "));
 
+// Les formules, telles que les recevra un classeur en français (« ; »).
+const J = (r) => `=LET(cout_article;N(IFERROR(INDEX('Carte appli'!$I:$I;MATCH(M${r};'Carte appli'!$F:$F;0));0));`
+  + `cout_frites;N(IFERROR(INDEX('Carte appli'!$I:$I;MATCH("menu_frites";'Carte appli'!$F:$F;0));0));`
+  + `IF(OR(cout_article<=0;AND(P${r};cout_frites<=0));D${r};N${r}*(cout_article+IF(P${r};cout_frites;0))))`;
+const L = (r) => `=IFERROR(1-INDEX('Carte appli'!$J:$J;MATCH(M${r};'Carte appli'!$F:$F;0));1)`;
 verifier(r.f.D2 === "=N2*O2" && r.f.E2 === "=D2" && r.f.E3 === "=N(E2)+D3",
   "montant = quantité × prix, cumul en formule", JSON.stringify([r.f.D2, r.f.E2, r.f.E3]));
-verifier(r.f.J2 === "=N2*('Carte appli'!I2+'Carte appli'!I6)",
-  "coût du panini avec frites : renvoi au coût de l'article + celui des frites", r.f.J2);
-verifier(r.f.J3 === "=N3*'Carte appli'!I3", "coût de la bière : renvoi à son coût", r.f.J3);
-verifier(r.f.L2 === "=1-'Carte appli'!J2" && r.f.L3 === "=1-'Carte appli'!J3",
-  "commission hôtel = 1 − part vendeur de l'article", `${r.f.L2} ${r.f.L3}`);
-verifier(r.f.H2 === "=(K2>0)*ROUND(100*K2*(1-L2))/100" && r.f.I2 === "=D2-H2" && r.f.K2 === "=D2-J2",
+verifier(r.f.J2 === J(2) && r.f.J3 === J(3) && r.f.J4 === J(4),
+  "coût : recherche par le code dans « Carte appli », frites si P, coût vide ou nul = bénéfice nul", r.f.J2);
+verifier(r.f.L2 === L(2) && r.f.L4 === L(4),
+  "commission hôtel : 1 − part vendeur cherchée par le code, 100 % si introuvable", r.f.L2);
+verifier(r.f.H2 === "=MAX(0;ROUND(K2*(1-L2);2))" && r.f.I2 === "=D2-H2" && r.f.K2 === "=D2-J2",
   "parts et bénéfice en formules", JSON.stringify([r.f.H2, r.f.I2, r.f.K2]));
+verifier(Object.keys(r.f).filter((k) => /^[D-L]\d+$/.test(k)).every((k) => !/'Carte appli'!\$?[A-Z]+\$?\d/.test(r.f[k])),
+  "aucun renvoi vers une ligne fixe de « Carte appli » (trier ne casse rien)", "");
+verifier(r.grille[1][15] === true && r.grille[2][15] === false && r.grille[0][15] === "Frites",
+  "colonne P « Frites » : VRAI / FAUX, un fait écrit en valeur", `${r.grille[0][15]} ${r.grille[1][15]} ${r.grille[2][15]}`);
 const calculees = r.grille.slice(1, 4).map((l) => [l[3], l[4], l[7], l[8], l[9], l[10], l[11]]);
 verifier(calculees.every((l) => l.every((v) => typeof v === "string" && v.startsWith("="))),
   "D, E et H à L : que des formules, aucun chiffre écrit", JSON.stringify(calculees));
-verifier(Object.values(r.f).every((x) => !/[,;]/.test(x)),
-  "aucune formule ne dépend du séparateur de la langue (ni « , » ni « ; »)", JSON.stringify(r.f));
+verifier(Object.entries(r.f).filter(([, x]) => x !== "=SUM(1,2)").every(([, x]) => !x.includes(",")),
+  "formules écrites avec le séparateur du classeur (« ; » ici)", JSON.stringify(r.f));
+verifier(r.grille.every((l) => !l.includes("=SUM(1,2)")), "la case d'essai du séparateur est effacée", "");
 
-// Ce que Sheets calculera, refait ici avec les valeurs de « Carte appli ».
-const calcul = (q, prix, cout, part) => {
-  const d = q * prix, k = d - q * cout;
-  return (k > 0 ? 1 : 0) * Math.round(100 * k * part) / 100;
+// Ce que Sheets calculera, refait ici comme le disent les formules.
+const calcul = ({ q, prix, cout, frites = false, coutFrites = 0, part }) => {
+  const d = q * prix;
+  const j = cout <= 0 || (frites && coutFrites <= 0) ? d : q * (cout + (frites ? coutFrites : 0));
+  const l = part === undefined ? 1 : 1 - part;
+  return Math.max(0, Math.round((d - j) * (1 - l) * 100) / 100);
 };
-verifier(calcul(2, 50, 18.33 + 4, 0.8) === 44.27, "panini ×2 avec frites : part vendeur 44,27 (80 % de 55,34)", "");
-verifier(calcul(3, 35, 16, 0) === 0, "bière ×3 : part vendeur 0 (0 % du bénéfice)", "");
+verifier(calcul({ q: 2, prix: 50, cout: 18.33, frites: true, coutFrites: 4, part: 0.8 }) === 44.27,
+  "panini ×2 avec frites : part vendeur 44,27 (80 % de 55,34)", "");
+verifier(calcul({ q: 3, prix: 35, cout: 16, part: 0 }) === 0, "bière ×3 : part vendeur 0 (0 % du bénéfice)", "");
+verifier(calcul({ q: 1, prix: 60, cout: 0, part: 0.8 }) === 0, "tajine sans coût : bénéfice nul, rien au vendeur", "");
+verifier(calcul({ q: 1, prix: 20, cout: 0 }) === 0, "article introuvable : rien au vendeur", "");
 verifier(JSON.stringify(r.appels[1]) === JSON.stringify({ action: "ventes_ack", ids: [2, 3] }),
   "accusé une fois par vente, pas par article", JSON.stringify(r.appels[1]));
 
-// 2. Coût inconnu ou article absent de la carte : bénéfice nul, rien pour le vendeur.
-r = tirer({ lignes: [
-  { id: 8, date_vente: "2026-09-27", description: "Tajine", client: "X", vendeur: "momo", code: "tajine_kefta", quantite: 1, prix_unitaire: 60, avec_frites: false },
-  { id: 9, date_vente: "2026-09-27", description: "Nouveau", client: "X", vendeur: "momo", code: "inconnu", quantite: 1, prix_unitaire: 20, avec_frites: false },
-] });
-verifier(r.f.J2 === "=D2" && r.f.J3 === "=D3", "coût inconnu ou article hors carte : J = D (bénéfice nul)", `${r.f.J2} ${r.f.J3}`);
-verifier(r.f.L3 === "=1", "article hors carte : commission hôtel 100 %", r.f.L3);
-
 // 3. Une vente déjà dans l'onglet : pas de doublon même si un accusé s'est perdu.
-const dejaLa = grilleVide(12, 15);
+const dejaLa = grilleVide(12, 16);
 dejaLa[0] = ["Id", "Date", "Description", "Prix", "Prix total cumule", "nom client", "Vendeur",
-  "pour l'hotel", "pour le vendeur", "", "", "", "", "", ""];
-dejaLa[1] = [2, new Date(2026, 8, 20, 12), "déjà écrite", 100, 100, "Alice", "momo", 0, 100, "", "", "", "", "", ""];
+  "pour l'hotel", "pour le vendeur", "", "", "", "", "", "", ""];
+dejaLa[1] = [2, new Date(2026, 8, 20, 12), "déjà écrite", 100, 100, "Alice", "momo", 0, 100, "", "", "", "", "", "", ""];
 r = tirer({ journal: dejaLa });
 verifier(r.ecrites === 1 && r.grille[2][0] === 3, "vente déjà présente non réécrite, la nouvelle s'ajoute en bas", r.ecrites);
 verifier(r.f.E3 === "=N(E2)+D3", "le cumul reprend la ligne du dessus", r.f.E3);

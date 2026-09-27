@@ -382,29 +382,32 @@ Elles sont créées à 80 % au premier envoi, puis jamais réécrites. Changer
 une case, c'est tout : le Journal Snack suit, **lignes passées comprises**
 (ce sont des formules). L'appli ne calcule plus de prime.
 
-« Carte appli » porte deux colonnes de renvoi, **« Coût revient »** et
-**« Part vendeur »** (`='Items & Sandwichs'!H12`…), refaites à chaque envoi :
-ne pas les remplir à la main.
+« Carte appli » porte deux colonnes, **« Coût revient »** et **« Part
+vendeur »** : une recherche par le nom de la colonne C (« Produit de la
+fiche ») dans « Items & Sandwichs » puis « Boissons », la même formule sur
+chaque ligne. **Nouvel article** : tirer la formule de la ligne du dessus.
+Le nom en C doit être écrit exactement comme l'en-tête du produit ou le nom
+de la boisson (majuscules indifférentes) ; à un accent près, l'envoi le
+corrige. Un nom introuvable laisse les deux cases vides.
 
-Dans le « Journal Snack », une ligne par article vendu :
+Dans le « Journal Snack », une ligne par article vendu. Chaque formule
+cherche l'article **par son code** (colonne M) dans « Carte appli » : trier
+ou déplacer « Carte appli » ne casse rien.
 
 | Colonne | Contenu |
 |---|---|
 | A Id | numéro de la vente (le même pour tous ses articles) |
 | D Montant | `=N×O` |
-| H Part vendeur | `=(K > 0) × ROUND(100 × K × (1 − L)) / 100` |
+| H Part vendeur | `=MAX(0; ARRONDI(K × (1 − L); 2))` |
 | I Part hotel | `=D−H` |
-| J Cout | `=N × coût de l'article dans « Carte appli »` (+ celui des frites) |
+| J Cout | `=N × (coût de l'article + coût des frites si P)` ; coût vide ou nul : `=D`, bénéfice nul |
 | K Benefice | `=D−J` |
-| L Commission hotel | `=1 − part vendeur de l'article dans « Carte appli »` |
-| M Code, N Quantite, O Prix unitaire | les faits envoyés par l'appli |
+| L Commission hotel | `=1 − part vendeur de l'article` ; article introuvable : 100 % |
+| M Code, N Quantite, O Prix unitaire, P Frites | les faits envoyés par l'appli |
 
-Aucune formule n'a de « , » ni de « ; » : elles marchent quelle que soit la
-langue du classeur.
-
-À savoir : un article sans coût de revient (ou absent de « Carte appli ») au
-moment de la vente est écrit avec J = D : bénéfice nul, rien pour le vendeur.
-Les ventes d'avant le 27/09/2026 restent telles qu'elles ont été écrites.
+Tout se recalcule seul : un coût ajouté après coup corrige les ventes où il
+manquait. Les ventes d'avant le 27/09/2026 restent telles qu'elles ont été
+écrites.
 
 ### Savoir ce que l'équipe doit
 **C'est dans l'appli, pas dans le classeur** : page Snack, et Admin → onglet
