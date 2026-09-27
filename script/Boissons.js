@@ -4,8 +4,8 @@
  * boisson n'entre dans la composition d'aucun sandwich.
  *
  * Menu « Déplacer les boissons dans leur onglet » (une fois) : crée l'onglet,
- * y recopie les boissons de « Cout par item » avec leur prix de vente, puis
- * retire de « Cout par item » leurs colonnes et les ingrédients qui ne
+ * y recopie les boissons de « Items & Sandwichs » avec leur prix de vente, puis
+ * retire de « Items & Sandwichs » leurs colonnes et les ingrédients qui ne
  * servaient qu'à elles.
  */
 
@@ -87,7 +87,7 @@ function deplacerBoissons() {
     });
     formaterBoissons_(b);
 
-    // 2. Cout par item : colonnes puis lignes, de la fin vers le début.
+    // 2. Items & Sandwichs : colonnes puis lignes, de la fin vers le début.
     colsBoissons.sort((x, y) => y - x).forEach((c) => f.deleteColumn(c));
     lignesRetirees.sort((x, y) => y - x).forEach((r) => f.deleteRow(r));
     mettreAJour();

@@ -21,7 +21,7 @@ const verifier = (condition, titre, vu) => {
   else { console.log(`  ÉCHEC ${titre} — vu : ${vu}`); echecs++; }
 };
 
-/** « Cout par item » : deux ingrédients, dont un seul a un code équipe. */
+/** « Items & Sandwichs » : deux ingrédients, dont un seul a un code équipe. */
 function coutParItem() {
   const g = grilleVide(10, 10);
   g[1][5] = "PaniniKefta";
@@ -44,7 +44,7 @@ function envoyer(lignesBoissons, entetes = ["Boisson", "Prix d'achat", "Prix de 
   lignesBoissons.forEach((l, i) => l.forEach((v, j) => { boissons[i + 1][j] = v; }));
 
   const { ctx, appels } = fauxContexte({
-    "Cout par item": new FausseFeuille(coutParItem()),
+    "Items & Sandwichs": new FausseFeuille(coutParItem()),
     "Boissons": new FausseFeuille(boissons),
   }, () => ({ code: 200, corps: '{"produits":0}' }));
   vm.createContext(ctx);
@@ -130,7 +130,7 @@ function ajouter(lignesBoissons, { debut = 2, nb = 1, reponse = "", confirme = t
   b.getActiveRange = () => ({ getRow: () => debut, getNumRows: () => nb });
 
   const { ctx } = fauxContexte({
-    "Cout par item": new FausseFeuille(coutParItem()),
+    "Items & Sandwichs": new FausseFeuille(coutParItem()),
     "Boissons": b,
   }, () => ({ code: 200, corps: '{"produits":0}' }));
   ctx.SpreadsheetApp.getUi = () => ({

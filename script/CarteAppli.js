@@ -4,7 +4,7 @@
  *
  *   A Rubrique            titre du groupe dans l'appli (Boissons, Paninis…)
  *   B Article             nom affiché dans l'appli
- *   C Produit de la fiche nom exact du produit dans « Cout par item »
+ *   C Produit de la fiche nom exact du produit dans « Items & Sandwichs »
  *                         (ligne 2) ou de la boisson dans « Boissons »
  *                         (colonne A) : son prix de vente est repris de là
  *   D Sauce               coché = une des 4 sauces à choisir à la vente
@@ -12,7 +12,7 @@
  *   F Code                identifiant fixe de l'article dans l'appli
  *   G Prix envoyé         écrit par le script au dernier envoi
  *
- * Le prix de revient part avec la carte : il est lu dans « Cout par item »
+ * Le prix de revient part avec la carte : il est lu dans « Items & Sandwichs »
  * (ligne « Coût revient ») ou, pour une boisson, dans « Boissons »
  * (colonne B, prix d'achat). C'est lui qui permet à l'appli de calculer la
  * prime du vendeur : 80 % du bénéfice de la vente, l'hôtel en garde 20 %
@@ -84,7 +84,7 @@ function creerCarteAppli() {
       + 'Code (jaune) : ne plus le changer une fois envoyé.'
       + (introuvables.length
         ? `\n\nProduit introuvable dans la fiche (orange) : ${introuvables.map(({ l }) => l[2]).join(', ')}. `
-          + 'Écrivez le nom exact du produit (Cout par item, ligne 2) ou de la boisson (Boissons, colonne A).'
+          + 'Écrivez le nom exact du produit (Items & Sandwichs, ligne 2) ou de la boisson (Boissons, colonne A).'
         : ''),
       ui.ButtonSet.OK);
   } catch (e) {
@@ -171,7 +171,7 @@ function lireCarte_() {
     if (!String(rubrique).trim()) throw new Error(`${ou} : colonne Rubrique vide.`);
     const p = prix[cle_(produit)];
     if (p === undefined) {
-      throw new Error(`${ou} : produit « ${produit} » introuvable (Cout par item, ligne 2, ou Boissons, colonne A).`);
+      throw new Error(`${ou} : produit « ${produit} » introuvable (Items & Sandwichs, ligne 2, ou Boissons, colonne A).`);
     }
     if (typeof p !== 'number' || p <= 0) throw new Error(`${ou} : « ${produit} » n'a pas de prix de vente.`);
     // Coût de revient : sans lui l'appli ne donne pas de prime, mais la

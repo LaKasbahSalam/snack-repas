@@ -1,5 +1,5 @@
 /**
- * Fiche repas — onglet « Cout par item » : coût de revient, marge et prix
+ * Fiche repas — onglet « Items & Sandwichs » : coût de revient, marge et prix
  * conseillé de chaque produit du snack.
  *
  * Disposition attendue :
@@ -16,7 +16,7 @@
  * saisis à la main ; le script ne les écrase jamais.
  */
 
-const FEUILLE = 'Cout par item';
+const FEUILLE = 'Items & Sandwichs';
 const COL_PRODUITS = 6; // F
 const COL_LIBELLES = 5; // E
 const LIGNE_IMAGES = 1;

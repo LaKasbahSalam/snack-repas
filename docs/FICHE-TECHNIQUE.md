@@ -72,8 +72,8 @@ lendemain.
 | Changer un code déjà envoyé | L'appli croit à un produit nouveau ; l'ancien disparaît de la page Snack et ce qui y était rattaché ne suit pas |
 | Laisser un code sur une ligne sans aucun prix | Même effet : l'envoi entier est refusé, rien ne part |
 | Déplacer les colonnes A, B, C de l'onglet « Boissons » | Nom, prix d'achat et prix de vente y sont lus **à leur place**, pas à leur titre |
-| Déplacer la colonne E (Prix/unité) de « Cout par item » | Même raison |
-| Supprimer ou renommer un onglet (`Cout par item`, `Boissons`, `Carte appli`, `Journal Snack`) | Les scripts cherchent le nom exact et s'arrêtent |
+| Déplacer la colonne E (Prix/unité) de « Items & Sandwichs » | Même raison |
+| Supprimer ou renommer un onglet (`Items & Sandwichs`, `Boissons`, `Carte appli`, `Journal Snack`) | Les scripts cherchent le nom exact et s'arrêtent |
 | Réécrire une ligne déjà posée du « Journal Snack » | C'est une pièce comptable ; le script n'y touche plus, mais une ligne effacée ne revient pas |
 
 ### Exercices V16 — à ne jamais faire
@@ -117,7 +117,7 @@ document — y compris ce que vous vouliez garder.
 
 | Onglet | À quoi il sert | Qui l'écrit |
 |---|---|---|
-| **Cout par item** | Un ingrédient par ligne, un produit par colonne : coût de revient, marge, prix conseillé | Vous + le menu Snack |
+| **Items & Sandwichs** | Un ingrédient par ligne, un produit par colonne : coût de revient, marge, prix conseillé | Vous + le menu Snack |
 | **Boissons** | Une boisson par ligne : prix d'achat, prix de vente, code et prix équipe | Vous + le menu Snack |
 | **Carte appli** | Ce que l'équipe vend aux clients : rubrique, article, code | Vous + le menu Snack |
 | **Journal Snack** | Une ligne par vente faite dans l'appli, avec le partage vendeur / hôtel en formules | Le script, uniquement en bas |
@@ -127,7 +127,7 @@ document — y compris ce que vous vouliez garder.
 C'est ce qui rend la feuille déroutante au premier abord, et ce qui explique la
 plupart des messages d'erreur.
 
-| | **Cout par item** et **Boissons** | **Carte appli** |
+| | **Items & Sandwichs** et **Boissons** | **Carte appli** |
 |---|---|---|
 | Ce que c'est | Ce que vous achetez, et ce que ça vous coûte | Ce que le client voit sur l'écran de vente |
 | Contient des prix ? | **Oui** — prix d'achat, prix de vente, prix équipe | **Non** — elle *désigne* un produit et emprunte ses prix |
@@ -202,7 +202,7 @@ moment de la vente.
 - Les écarts de prix avec la carte sont signalés, jamais corrigés d'office.
 
 ### Déplacer les boissons dans leur onglet
-- Opération faite une fois (20/09/2026) : crée l'onglet « Boissons », y recopie les boissons avec leur prix de vente, puis retire de « Cout par item » leurs colonnes et les ingrédients qui ne servaient qu'à elles.
+- Opération faite une fois (20/09/2026) : crée l'onglet « Boissons », y recopie les boissons avec leur prix de vente, puis retire de « Items & Sandwichs » leurs colonnes et les ingrédients qui ne servaient qu'à elles.
 - **À ne plus relancer.** La liste des six boissons d'origine est figée dans le script (`BOISSONS` dans `script/Boissons.js`) : il rajoute celles qu'il n'y trouve plus. Depuis que « Coca / Hawai » a été scindé en Coca, Hawai et Sprite, le relancer recréerait une ligne « Coca / Hawai ».
 - Il ne sert donc plus à reformater : les formules d'une ligne ajoutée à la main se recopient depuis la ligne du dessus.
 
@@ -213,7 +213,7 @@ moment de la vente.
 ### Ajouter à la page Snack de l'équipe
 Le bouton le plus utilisé. Il travaille sur l'onglet où vous êtes.
 
-- **Depuis « Cout par item »** : la ligne où vous avez cliqué reçoit un code tiré de son nom, unique ; le prix proposé à l'équipe est le **prix coûtant** (colonne E). Le prix est vérifié **avant** d'écrire le code — un code sans prix bloquerait tous les envois suivants.
+- **Depuis « Items & Sandwichs »** : la ligne où vous avez cliqué reçoit un code tiré de son nom, unique ; le prix proposé à l'équipe est le **prix coûtant** (colonne E). Le prix est vérifié **avant** d'écrire le code — un code sans prix bloquerait tous les envois suivants.
 - **Depuis « Boissons »** : les lignes sélectionnées (plusieurs d'un coup) reçoivent un code et un **prix équipe**, 6 DH par défaut, un autre prix si vous le tapez. Une boisson n'est pas cédée à son prix d'achat.
 - Dans les deux cas : confirmation avant d'écrire quoi que ce soit, puis l'envoi part.
 - **Ce qui l'arrête** : un prix manquant, un code déjà pris, une ligne vide.
@@ -236,7 +236,7 @@ Le bouton le plus utilisé. Il travaille sur l'onglet où vous êtes.
 ## Ce qu'un gestionnaire veut faire
 
 ### Changer le prix de vente d'un produit
-1. « Cout par item », ligne « Prix de vente », taper le nouveau prix.
+1. « Items & Sandwichs », ligne « Prix de vente », taper le nouveau prix.
 2. Menu Snack → « Envoyer les prix à l'appli » (ou attendre 22h30).
 
 Ressources : Sheets, `CarteAppli.js`, Edge Function `import-prix-snack`. **Rien à coder.**
@@ -268,13 +268,13 @@ garder le reste de la ligne. Elle devient invisible pour le script, prête à
 avec n'importe quel titre) : au retour, l'article doit reprendre
 **exactement le même**.
 
-**Retirer le produit lui-même** (la boisson ou la colonne de « Cout par item »)
+**Retirer le produit lui-même** (la boisson ou la colonne de « Items & Sandwichs »)
 vient **après** : tant qu'une ligne de carte le désigne, l'envoi s'arrête sur
 « produit introuvable ». L'ordre est toujours : la carte d'abord, le produit
 ensuite.
 
 Deux cas particuliers : `menu_frites` ne peut pas partir tant qu'une case
-Frites est cochée quelque part, et supprimer un ingrédient de « Cout par item »
+Frites est cochée quelque part, et supprimer un ingrédient de « Items & Sandwichs »
 change le coût de revient de tous les produits qui s'en servaient.
 
 **Code manquant** : une colonne « Épuisé » à cocher, qui retire l'article de
@@ -282,7 +282,7 @@ l'appli sans toucher ni à l'article ni au code. Réversible en un clic, et sans
 code à recopier à la main.
 
 ### Mettre un ingrédient à disposition de l'équipe, à prix coûtant
-1. « Cout par item », cliquer sur la ligne.
+1. « Items & Sandwichs », cliquer sur la ligne.
 2. Menu Snack → « Ajouter à la page Snack de l'équipe », confirmer.
 
 **Rien à coder.** L'appli, la base et la page Snack sont génériques : rien à changer de leur côté.
@@ -365,7 +365,7 @@ pas corrigé.
 **Rien à coder** — mais notez le code effacé : si le produit revient, il doit reprendre **le même**.
 
 ### Savoir si un produit est rentable
-1. « Cout par item » : coût de revient, marge, coût/prix et prix conseillé sont déjà calculés.
+1. « Items & Sandwichs » : coût de revient, marge, coût/prix et prix conseillé sont déjà calculés.
 2. L'objectif de coût (35 % par défaut) se change dans le bloc ; « Mettre à jour les calculs » recalcule les prix conseillés.
 
 **Rien à coder.** À surveiller : un coût de revient à 0 signale une recette incomplète, pas un produit gratuit.
@@ -415,7 +415,7 @@ comptabilité — et c'est la V16 qui compte l'argent, pas la Fiche repas.
 ### Faire le point sur les stocks
 Rien n'existe encore. C'est la tâche « Comptage des stocks » de `TASKS.md`.
 
-**Code à écrire** : un onglet « Stock » (quantité achetée − quantité vendue − quantité prise par l'équipe), alimenté par le Journal Snack et les recettes de « Cout par item ». Le calcul appartient au classeur : l'appli connaît les ventes par article, mais la recette n'existe qu'ici.
+**Code à écrire** : un onglet « Stock » (quantité achetée − quantité vendue − quantité prise par l'équipe), alimenté par le Journal Snack et les recettes de « Items & Sandwichs ». Le calcul appartient au classeur : l'appli connaît les ventes par article, mais la recette n'existe qu'ici.
 
 ### Mettre à jour la carte papier
 `Snacks and Drinks.dc.html` et les PDF du dossier ne sont **pas** reliés au classeur : ils se mettent à jour à la main.

@@ -1,5 +1,5 @@
 /**
- * Menu « Compléter depuis la carte » : ajoute à l'onglet « Cout par item »
+ * Menu « Compléter depuis la carte » : ajoute à l'onglet « Items & Sandwichs »
  * les produits de la carte (Snacks and Drinks.dc.html) et les ingrédients
  * qui manquent, sans rien toucher à ce qui existe déjà.
  *

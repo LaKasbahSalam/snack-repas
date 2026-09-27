@@ -20,7 +20,7 @@ const verifier = (condition, titre, vu) => {
   else { console.log(`  ÉCHEC ${titre} — vu : ${vu}`); echecs++; }
 };
 
-// « Cout par item » : ingrédients lignes 3 à 5, produits en F..H, et sous
+// « Items & Sandwichs » : ingrédients lignes 3 à 5, produits en F..H, et sous
 // les ingrédients le bloc « Coût revient » / « Prix de vente ».
 const coutParItem = grilleVide(12, 10);
 [["", "kefta", "", "", 2.45], ["", "pain panini", "", "", 3.38], ["", "coca", "", "", 6]]
@@ -48,7 +48,7 @@ carte[4] = ["Supplément", "Avec frites (menu)", "Menu (+frites)", false, false,
 
 const feuilleCarte = new FausseFeuille(carte);
 const { ctx } = fauxContexte({
-  "Cout par item": new FausseFeuille(coutParItem),
+  "Items & Sandwichs": new FausseFeuille(coutParItem),
   "Boissons": new FausseFeuille(boissons),
   "Carte appli": feuilleCarte,
 }, () => ({ code: 200, corps: "{}" }));

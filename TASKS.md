@@ -5,6 +5,7 @@
 - [ ] **Comptage des stocks** — suivre ce qui est acheté, vendu et consommé par l'équipe (les achats équipe sont déjà marqués `origine = 'equipe'` dans l'appli pour pouvoir les isoler)
 
 ## En cours
+- [ ] **Relancer l'envoi à l'appli** (menu Snack → « Envoyer les prix à l'appli ») et vérifier que les ventes après le 24/09 arrivent dans « Journal Snack » — *27/09/2026*
 - [ ] **Commission de 20 % : finir la mise en service** — script poussé au classeur le 25/09/2026. Reste : confirmer que la migration `20260925100000` est passée dans la base de l'appli (`tggdwwvdlrgncbntxkfs`, pas Kasbah Analytics), une vente test (H du Journal Snack = prime affichée dans l'appli), puis supprimer la colonne H « Retenue » de l'onglet « Carte appli », qui n'est plus lue
 - [ ] **Page de ventes du snack dans l'appli KasbahCalendar** — onglet « Journal » de la page Snack écrit le 21/09/2026 (KasbahCalendar, non commité), reste à livrer et à vérifier connecté
 - [ ] Tenir à jour `docs/FICHE-TECHNIQUE.md` : ce que fait chaque bouton des quatre outils, et ce qu'il reste à coder (à relire à chaque nouveau bouton)
@@ -12,6 +13,7 @@
 - [ ] Proposer les boissons à l'équipe à 6 DH : onglet « Boissons », sélectionner les lignes, menu Snack → « Ajouter à la page Snack de l'équipe » (le script pose le code et le prix équipe)
 
 ## Fait
+- [x] Onglet « Cout par item » renommé « Items & Sandwichs » dans le classeur : le script cherchait l'ancien nom et l'envoi à l'appli s'arrêtait (« Onglet introuvable »), Journal Snack bloqué au 24/09. Nom changé dans le script, les tests et la fiche technique ; script poussé au classeur (clasp pull comparé avant : aucune modification en ligne ; vérifié après : en ligne = dépôt) — 27/09/2026
 - [x] Prime du vendeur : 80 % du bénéfice, l'hôtel en garde 20 % (au lieu de la retenue en DH). Journal Snack : colonnes J Cout, K Benefice, L Commission hotel ; H et I deviennent des formules sur ces cases pour les nouvelles ventes. La Carte appli n'envoie plus de retenue. Script poussé au classeur (clasp pull comparé : aucune modification en ligne) — 25/09/2026
 - [x] Liste de courses sur téléphone (artefact claude.ai, photos, format et prix par article), tirée du classeur Gestion de stock — `courses/` — 23/09/2026
 - [x] Photos Pom's et Hawai dans l'appli (page Vente et page Équipe) — KasbahCalendar, `SnackImage.tsx`, non commité — 22/09/2026
