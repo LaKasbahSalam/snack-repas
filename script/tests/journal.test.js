@@ -110,14 +110,17 @@ verifier(g[0].slice(9, 12).join("|") === "Cout|Benefice|Commission hotel",
   "en-têtes J à L", g[0].join(" | "));
 verifier(g[1][9] === 44.66 && g[1][11] === 0.2,
   "coût en J, taux en L (0,2 affiché 20 %)", g[1].join(" | "));
-verifier(r.formulesA1.H2 === "=MAX(0,ROUND(K2*(1-L2),2))"
+verifier(r.formulesA1.H2 === "=(K2>0)*ROUND(100*K2*(1-L2))/100"
   && r.formulesA1.I2 === "=D2-H2" && r.formulesA1.K2 === "=D2-J2",
   "part vendeur, part hôtel et bénéfice en formules", JSON.stringify(r.formulesA1));
 verifier(r.formulesA1.J2 === undefined, "le coût reste une valeur, pas une formule", "");
 // Ce que la formule donnera dans Sheets, refait ici : elle doit retomber
 // sur la prime que l'appli a créditée au vendeur.
-const prime = Math.max(0, Math.round((g[1][3] - g[1][9]) * (1 - g[1][11]) * 100) / 100);
+const benef = g[1][3] - g[1][9];
+const prime = (benef > 0 ? 1 : 0) * Math.round(100 * benef * (1 - g[1][11])) / 100;
 verifier(prime === 44.27, "la formule retrouve la prime de l'appli (44,27)", prime);
+verifier(Object.values(r.formulesA1).every((f) => !/[,;]/.test(f)),
+  "aucune formule ne dépend du séparateur de la langue (ni « , » ni « ; »)", JSON.stringify(r.formulesA1));
 verifier(g[2][7] === 5 && g[2][8] === 7 && g[2][9] === "" && g[2][11] === ""
   && r.formulesA1.H3 === undefined,
   "vente sans coût ni taux : parts en valeurs, J à L vides", g[2].join(" | "));
@@ -132,7 +135,7 @@ verifier(r.grille[0].slice(5, 12).join("|") === "Client|Vendeur|Part vendeur|Par
   "onglet du 21/09 : J à L ajoutées, F à I intactes", r.grille[0].join(" | "));
 verifier(r.grille[1][7] === 16.67 && r.grille[1][9] === "",
   "vieille vente jamais touchée", r.grille[1].join(" | "));
-verifier(r.formulesA1.H3 === "=MAX(0,ROUND(K3*(1-L3),2))",
+verifier(r.formulesA1.H3 === "=(K3>0)*ROUND(100*K3*(1-L3))/100",
   "nouvelle vente en bas, formules sur sa propre ligne", JSON.stringify(r.formulesA1));
 
 // 4. Rien à écrire : aucun accusé inutile.

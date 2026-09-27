@@ -384,7 +384,7 @@ Dans le « Journal Snack », chaque vente montre son calcul :
 | J Cout | coût de revient de la vente (valeur de l'appli) |
 | K Benefice | `=D−J` |
 | L Commission hotel | 20 % (valeur de l'appli, figée à la vente) |
-| H Part vendeur | `=MAX(0; ARRONDI(K × (1 − L); 2))` |
+| H Part vendeur | `=(K > 0) × ROUND(100 × K × (1 − L)) / 100` (0 si la vente ne rapporte rien ; écrite sans séparateur pour marcher quelle que soit la langue du classeur) |
 | I Part hotel | `=D−H` |
 
 Les ventes d'avant le 25/09/2026 n'ont ni coût ni taux : H et I y sont des

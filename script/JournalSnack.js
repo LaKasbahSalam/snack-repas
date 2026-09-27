@@ -8,7 +8,7 @@
  *   E Montant total cumulé  formule, cumul de la colonne D
  *   F Client                à qui (nom de la fiche, ou « pas dans la liste »)
  *   G Vendeur               pseudo de qui a vendu
- *   H Part vendeur          sa prime : formule =MAX(0;ARRONDI(K×(1−L);2))
+ *   H Part vendeur          sa prime : formule =(K>0)*ROUND(100×K×(1−L))/100
  *   I Part hôtel            le reste : formule =D−H
  *   J Cout                  coût de revient de la vente, frites comprises
  *   K Benefice              formule =D−J
@@ -122,10 +122,14 @@ function tirerVentesSnack_(secret) {
       calculable(v) ? nombre(v.commission_hotel) / 100 : '',
     ]));
     // Le partage en formules, sur les ventes qui portent coût et taux.
+    // Aucune virgule ni point-virgule : le séparateur d'arguments dépend de
+    // la langue du classeur (« , » en anglais, « ; » en français), et une
+    // formule écrite avec le mauvais donne #ERROR! (27/09/2026). D'où
+    // (K>0)*… pour MAX(0; …) et ROUND(100×…)/100 pour ARRONDI(…; 2).
     aEcrire.forEach((v, i) => {
       if (!calculable(v)) return;
       const r = depart + i;
-      j.getRange(r, 8, 1, 2).setFormulas([[`=MAX(0,ROUND(K${r}*(1-L${r}),2))`, `=D${r}-H${r}`]]);
+      j.getRange(r, 8, 1, 2).setFormulas([[`=(K${r}>0)*ROUND(100*K${r}*(1-L${r}))/100`, `=D${r}-H${r}`]]);
       j.getRange(r, 11).setFormula(`=D${r}-J${r}`);
     });
     j.getRange(depart, 8, aEcrire.length, 4).setNumberFormat('0.00');
