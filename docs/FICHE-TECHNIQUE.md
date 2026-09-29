@@ -1,6 +1,6 @@
 # Fiche technique — les outils de La Kasbah Salam
 
-À jour du 20/09/2026. Ce document dit **ce que fait chaque bouton**, **ce qu'un
+À jour du 29/09/2026 (Partie 1 relue après le passage de la prime au classeur, le 27/09). Ce document dit **ce que fait chaque bouton**, **ce qu'un
 gestionnaire veut en faire, pas à pas**, **quelles pièces techniques cela met en
 marche**, et **ce qu'il reste à écrire** quand le bouton n'existe pas encore.
 
@@ -119,8 +119,8 @@ document — y compris ce que vous vouliez garder.
 |---|---|---|
 | **Items & Sandwichs** | Un ingrédient par ligne, un produit par colonne : coût de revient, marge, prix conseillé | Vous + le menu Snack |
 | **Boissons** | Une boisson par ligne : prix d'achat, prix de vente, code et prix équipe | Vous + le menu Snack |
-| **Carte appli** | Ce que l'équipe vend aux clients : rubrique, article, code | Vous + le menu Snack |
-| **Journal Snack** | Une ligne par vente faite dans l'appli, avec le partage vendeur / hôtel en formules | Le script, uniquement en bas |
+| **Carte appli** | Ce que l'équipe vend aux clients : rubrique, article, code, et en renvoi le coût de revient et la part du vendeur | Vous + le menu Snack |
+| **Journal Snack** | Une ligne par article vendu dans l'appli (depuis le 27/09/2026), avec le partage vendeur / hôtel en formules | Le script, uniquement en bas |
 
 ## Le produit et l'article : la ligne de partage
 
@@ -175,11 +175,12 @@ changer un code ne produit aucune erreur visible, et c'est ce qui le rend
 dangereux.**
 
 Le prix de revient suit le même chemin que le prix : pour une boisson, c'est le
-prix d'achat (colonne B) ; pour un plat, la ligne « Coût revient » de « Cout par
-item ». C'est lui qui donne la prime du vendeur : 80 % du bénéfice de la vente
-(prix de vente − coût), l'hôtel en garde 20 %. Un produit sans coût de revient
-se vend quand même, mais ne rapporte rien au vendeur, et rien ne le signale au
-moment de la vente.
+prix d'achat (colonne B) ; pour un plat, la ligne « Coût revient » de « Items &
+Sandwichs ». C'est lui qui donne la prime du vendeur : sa part du bénéfice de la
+vente (prix de vente − coût), réglée par article dans le classeur — 80 % au
+départ, 0 % pour la bière (voir « Changer la prime des vendeurs »). Un produit
+sans coût de revient se vend quand même, mais ne rapporte rien au vendeur tant
+que le coût manque ; le Journal Snack se corrige seul quand il arrive.
 
 ## Le menu Snack, bouton par bouton
 
@@ -220,7 +221,7 @@ Le bouton le plus utilisé. Il travaille sur l'onglet où vous êtes.
 
 ### Créer l'onglet Carte appli
 - Crée l'onglet et le pré-remplit d'après la carte papier : rubrique, article, produit de la fiche, cases Sauce et Frites, code.
-- La prime du vendeur ne se règle plus ici : depuis le 25/09/2026, c'est 80 % du bénéfice de la vente, l'hôtel en garde 20 % (taux fixé dans l'appli). Une ancienne colonne « Retenue » en H n'est plus lue : on peut la supprimer.
+- La prime du vendeur se règle dans « Items & Sandwichs » et « Boissons » (ligne et colonne « Part vendeur », depuis le 27/09/2026) ; « Carte appli » n'en porte qu'un renvoi. Une ancienne colonne « Retenue » en H n'est plus lue : on peut la supprimer.
 
 ### Envoyer les prix à l'appli
 - Envoie en un seul passage : les prix coûtants des ingrédients codés, les boissons codées à leur prix équipe, et la carte de vente si l'onglet existe. **L'appli remplace toute sa liste** à chaque envoi.
@@ -423,7 +424,7 @@ par une entrée de caisse « +X snack pseudo ».
 comptabilité — et c'est la V16 qui compte l'argent, pas la Fiche repas.
 
 ### Suivre les ventes du jour
-1. « Journal Snack » : une ligne par vente, avec le cumul en colonne E.
+1. « Journal Snack » : une ligne par article vendu (plusieurs lignes pour une même vente, même Id en A), avec le cumul en colonne E.
 2. Pour voir la journée en cours sans attendre 22h30 : « Envoyer les prix à l'appli », qui tire les ventes au passage.
 
 **Code manquant** : un bouton « Tirer les ventes » seul, sans renvoyer les prix — l'envoi complet est lourd et inutile quand on veut juste regarder.
