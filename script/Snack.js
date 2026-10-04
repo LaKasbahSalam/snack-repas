@@ -39,6 +39,7 @@ function onOpen() {
   SpreadsheetApp.getUi()
     .createMenu('Snack')
     .addItem('Mettre à jour les calculs', 'mettreAJour')
+    .addItem('Mettre en forme la fiche', 'mettreEnForme')
     .addSeparator()
     .addItem('Ajouter un ingrédient', 'ajouterIngredient')
     .addItem('Ajouter un produit', 'ajouterProduit')
@@ -209,6 +210,7 @@ function mettreAJour() {
     SpreadsheetApp.newConditionalFormatRule()
       .whenFormulaSatisfied(fx_(`=OR($E${PREMIERE_LIGNE}="",$E${PREMIERE_LIGNE}=0)`))
       .setBackground('#fce5cd').setRanges([e]).build(),
+    ...reglesGrille_(f, der, derCol), // MiseEnForme.js : quantités utilisées en vert, zéros effacés
   ]);
 }
 

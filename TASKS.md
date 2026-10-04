@@ -5,6 +5,12 @@
 - [ ] **Comptage des stocks** — suivre ce qui est acheté, vendu et consommé par l'équipe (les achats équipe sont déjà marqués `origine = 'equipe'` dans l'appli pour pouvoir les isoler)
 
 ## En cours
+- [ ] **Nouvelle carte (v4, 04/10/2026)** à reporter dans le classeur :
+  1. Karim : menu Snack → « Mettre en forme la fiche » (script poussé le 04/10/2026), puis vérifier « Items & Sandwichs » et le nouvel onglet « Plats ».
+  2. Prix à taper : jus d'orange 15 (Boissons, C), frites & nuggets 30, sandwich avocat, œuf, tomate 35 (« Prix de vente » d'Items & Sandwichs) ; puis « Envoyer les prix à l'appli ».
+  3. Paninis petit 30 / grand 50 : quantités à voir avec l'équipe ; ensuite une colonne par grand panini et un code `…_grand` par article dans « Carte appli » (ne jamais changer un code existant).
+  4. Omelette au zaalouk (30) : recette et prix des ingrédients à fournir.
+  5. À trancher : burgers, bière et Poms, absents de la carte imprimée : retirés de l'appli ou gardés ?
 - [ ] **Prime calculée dans le classeur : mise en service** — script poussé au classeur et base migrée le 27/09/2026. Reste :
   1. ~~Migration `20260927110000_snack_prime_au_classeur.sql`~~ : exécutée par Karim dans la base de l'appli le 27/09/2026, KasbahCalendar poussé.
   2. Menu Snack → « Envoyer les prix à l'appli » : vérifier la ligne « Part vendeur » sous le bloc de « Items & Sandwichs » (80 %), la colonne « Part vendeur » de « Boissons » (bière 0 %), et les colonnes « Coût revient » / « Part vendeur » de « Carte appli » (recherches par le nom ; case vide = nom introuvable, à corriger en colonne C).
@@ -13,11 +19,13 @@
   5. Supprimer la colonne H « Retenue » de « Carte appli » (plus lue) ; les colonnes de renvoi se recalent d'elles-mêmes au prochain envoi.
 - [ ] **Journal Snack : réparer H22:H25 à la main** (`#ERROR!`, anciennes lignes) : en H22 `=(K22>0)*ARRONDI(100*K22*(1-L22))/100`, puis tirer jusqu'à H25 ; I suit d'elle-même — *27/09/2026*
 - [ ] **À trancher par Karim** : les bières vendues du 25 au 26/09 ont donné une prime dans l'appli (91,20 et 45,60 à Ayoub, au moins) ; la reprendre ou non
-- [ ] Tenir à jour `docs/FICHE-TECHNIQUE.md` : ce que fait chaque bouton des quatre outils, et ce qu'il reste à coder (à relire à chaque nouveau bouton) — Partie 1 relue le 29/09/2026 ; version à trois onglets (manager, technique, améliorations) dans le dossier « Workflows » du Drive, « Fiche repas — workflow »
+- [ ] Tenir à jour `docs/FICHE-TECHNIQUE.md` : ce que fait chaque bouton des quatre outils, et ce qu'il reste à coder (à relire à chaque nouveau bouton)
+ — Partie 1 relue le 29/09/2026 ; version à trois onglets (manager, technique, améliorations) dans le dossier « Workflows » du Drive, « Fiche repas — workflow »
 - [ ] Compléter la Fiche repas : prix d'achat des nouveaux ingrédients et des boissons, quantités en jaune (tajines, fromage…), prix à aligner sur la carte
 - [ ] Proposer les boissons à l'équipe à 6 DH : onglet « Boissons », sélectionner les lignes, menu Snack → « Ajouter à la page Snack de l'équipe » (le script pose le code et le prix équipe)
 
 ## Fait
+- [x] Fiche repas plus lisible : menu « Mettre en forme la fiche » (`MiseEnForme.js`). Il retire les lignes vides ou en double sous le bloc (Revenu, Benefice, Part Vendeur, Part Hotel si vides), colore les quantités utilisées et efface les zéros, fige les noms de plats et les colonnes A à E, et crée l'onglet « Plats » (un plat ou une boisson par ligne : ingrédients en clair, coût, prix, marge, % coût en rouge ou vert, prix conseillé, part vendeur ; triable avec un filtre, tout en recherches par le nom). Test `mise-en-forme.test.js`. Script poussé au classeur (comparé avant : aucune modification en ligne) — 04/10/2026
 - [x] Page de ventes du snack dans l'appli : onglet « Journal » de la page Snack, livré dans KasbahCalendar (commit 4b7ef23) — tâche fermée le 29/09/2026
 - [x] Prime du vendeur calculée par le classeur seul (décision Karim : le classeur fait foi). Part vendeur en % du bénéfice, réglée par article : ligne « Part vendeur » de « Items & Sandwichs », colonne « Part vendeur » de « Boissons » (bière 0 %). « Carte appli » les cherche par le nom (`PartVendeur.js`). Journal Snack : une ligne par article, faits en valeurs (code, quantité, prix payé, frites), montant, coût, bénéfice, commission et parts en formules qui cherchent l'article par son code : aucun renvoi vers une ligne fixe, un coût ajouté après coup corrige les ventes passées. Tests : `parts.test.js`, `journal.test.js` réécrit. Script poussé au classeur (comparé avant, vérifié après) — 27/09/2026
 - [x] Journal Snack : la part vendeur (H) s'écrivait `=MAX(0,ROUND(…,2))`, refusée par le classeur en français (virgule = décimales) → `#ERROR!` sur H et I dès les premières ventes portant coût et taux (25-26/09). Formule réécrite sans séparateur, `=(K>0)*ROUND(100*K*(1-L))/100`, et un test qui interdit « , » et « ; » dans les formules du journal. Envoi relancé : ventes du 24 au 26/09 arrivées. Script poussé au classeur (comparé avant, vérifié après) — 27/09/2026
