@@ -24,7 +24,10 @@ class FausseFeuille {
     this.formules = {};   // { numéro de ligne : formule écrite en colonne E }
     this.formulesA1 = {}; // { « H5 » : formule écrite dans cette case }
     this.lignesGelees = 0;
+    this.notes = {};       // { « I1 » : note posée sur la case }
+    this.protections = []; // plages protégées (avertissement)
   }
+  getProtections() { return [...this.protections]; }
   getMaxRows() { return this.g.length; }
   getMaxColumns() { return this.g[0].length; }
   setFrozenRows(n) { this.lignesGelees = n; return this; }
@@ -68,6 +71,14 @@ class FausseFeuille {
       // Mise en forme : acceptée et ignorée.
       setNumberFormat: () => api, setBackground: () => api, setFontWeight: () => api,
       setFontColor: () => api, insertCheckboxes: () => api,
+      setNote: (t) => { feuille.notes[String.fromCharCode(64 + c) + r] = t; return api; },
+      protect: () => {
+        const pr = { d: "", plage: String.fromCharCode(64 + c) + r, getDescription: () => pr.d,
+          setDescription: (d) => { pr.d = d; return pr; }, setWarningOnly: (w) => { pr.avertir = w; return pr; },
+          remove: () => { feuille.protections = feuille.protections.filter((x) => x !== pr); } };
+        feuille.protections.push(pr);
+        return pr;
+      },
       isBlank: () => api.getValues().every((l) => l.every((v) => v === "")),
       clearContent: () => {
         for (let i = 0; i < nr; i++) for (let j = 0; j < nc; j++) if (g[r - 1 + i]) g[r - 1 + i][c - 1 + j] = "";
@@ -96,6 +107,7 @@ function fauxContexte(feuilles, reponses) {
           getSheetByName: (n) => feuilles[n] ?? null,
           insertSheet: () => null,
         }),
+        ProtectionType: { RANGE: "RANGE" },
         getUi: () => ({ alert: () => {}, prompt: () => ({}), ButtonSet: {}, Button: {} }),
         flush: () => {},
       },

@@ -99,4 +99,20 @@ function preparerPartsVendeur_() {
   });
   c.getRange(2, colCout, n, 1).setFormulas(formules.map((l) => [l[0]])).setNumberFormat('0.00');
   c.getRange(2, colPart, n, 1).setFormulas(formules.map((l) => [l[1]])).setNumberFormat('0%');
+  marquerLecture_(c, colCout, n, `Calculé, ne pas taper ici : se règle dans « ${FEUILLE} » (ligne « ${LIBELLE_COUT} ») ou « ${FEUILLE_BOISSONS} » (prix d'achat).`);
+  marquerLecture_(c, colPart, n, `Calculé, ne pas taper ici : se règle dans « ${FEUILLE} » (ligne « ${LIBELLE_PART} ») ou « ${FEUILLE_BOISSONS} » (colonne « ${LIBELLE_PART} »).`);
+}
+
+/**
+ * Colonne en lecture seule pour l'œil : grisée, une note sur l'en-tête, et
+ * une protection « avertissement » (Sheets demande confirmation avant une
+ * saisie, sans rien bloquer). Reposée à chaque envoi, sans doublon.
+ */
+function marquerLecture_(c, col, n, note) {
+  c.getRange(1, col).setNote(note).setBackground('#d9d9d9');
+  c.getRange(2, col, n, 1).setBackground('#efefef').setFontColor('#666666');
+  const desc = `Lecture : ${c.getRange(1, col).getValue()}`;
+  c.getProtections(SpreadsheetApp.ProtectionType.RANGE)
+    .filter((pr) => pr.getDescription() === desc).forEach((pr) => pr.remove());
+  c.getRange(1, col, n + 1, 1).protect().setDescription(desc).setWarningOnly(true);
 }

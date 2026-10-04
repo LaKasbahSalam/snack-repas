@@ -95,5 +95,13 @@ verifier(boissons[2][7] === 0.1 && boissons[0].filter((e) => e === "Part vendeur
 verifier(carte[0].filter((e) => e === "Part vendeur").length === 1 && fCarte.formulesA1.J2 === part(2),
   "carte : mêmes colonnes, mêmes formules", carte[0].join(" | "));
 
+// 4. Colonnes I et J annoncées comme lues : note, protection d'avertissement, sans doublon.
+verifier(/Calculé.*Items & Sandwichs/.test(fCarte.notes.I1 || "") && /Calculé.*Part vendeur/.test(fCarte.notes.J1 || ""),
+  "notes « Calculé, ne pas taper ici » sur I1 et J1", JSON.stringify(fCarte.notes));
+vm.runInContext("preparerPartsVendeur_()", ctx);
+const prot = fCarte.protections;
+verifier(prot.length === 2 && prot.every((p) => p.avertir === true),
+  "deux protections en avertissement, pas de doublon au deuxième envoi", prot.map((p) => p.d).join(" | "));
+
 console.log(echecs === 0 ? "\nTout passe.\n" : `\n${echecs} échec(s).\n`);
 process.exit(echecs === 0 ? 0 : 1);
