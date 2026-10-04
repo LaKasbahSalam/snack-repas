@@ -53,6 +53,7 @@ function mettreEnForme() {
 
   // 3. L'onglet « Plats ».
   const n = construirePlats_(f);
+  poserModesDEmploi(); // Aide.js
 
   SpreadsheetApp.getUi().alert(
     `Fiche mise en forme.\n\n`

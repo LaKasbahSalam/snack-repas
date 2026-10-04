@@ -24,11 +24,18 @@ class Feuille extends FausseFeuille {
   setFrozenColumns() { return this; }
   setConditionalFormatRules(r) { this.regles = r; return this; }
   getFilter() { return this.filtre; }
+  protect() {
+    const pr = { d: "", getDescription: () => pr.d, setDescription: (d) => { pr.d = d; return pr; },
+      setWarningOnly: (w) => { pr.avertir = w; return pr; },
+      remove: () => { this.protections = this.protections.filter((x) => x !== pr); } };
+    this.protections.push(pr);
+    return pr;
+  }
   getRange(...a) {
     const api = super.getRange(...a);
     const feuille = this;
     return Object.assign(api, {
-      setWrap: () => api, clear: () => api.clearContent(),
+      setWrap: () => api, clear: () => api.clearContent(), setFontSize: () => api, setVerticalAlignment: () => api,
       getFormulas: () => api.getValues().map((l) => l.map((v) => (String(v).startsWith("=") ? v : ""))),
       createFilter: () => { feuille.filtre = { remove: () => { feuille.filtre = null; } }; return feuille.filtre; },
     });
@@ -59,12 +66,16 @@ carte[1] = ["Paninis", "Panini kefta", "PaniniKefta", true, true, "panini_kefta"
 
 const fItems = new Feuille(items);
 const plats = new Feuille(grilleVide(3, 10));
-const feuilles = { "Items & Sandwichs": fItems, "Boissons": new Feuille(boissons), "Carte appli": new Feuille(carte) };
+const aide = new Feuille(grilleVide(25, 2));
+const journal = grilleVide(3, 16);
+journal[0] = ["Id", "date", "description", "Prix", "Prix total cumule", "nom client", "Vendeur", "Pour le vendeur", "pour l'hotel", "Cout", "Benefice", "Commission hotel", "Code", "Quantite", "Prix unitaire", "Frites"];
+const fJournal = new Feuille(journal);
+const feuilles = { "Items & Sandwichs": fItems, "Boissons": new Feuille(boissons), "Carte appli": new Feuille(carte), "Journal Snack": fJournal };
 const { ctx } = fauxContexte(feuilles, () => ({ code: 200, corps: "{}" }));
 let alerte = "";
 ctx.SpreadsheetApp.getActive = () => ({
   getSheetByName: (n) => feuilles[n] ?? null,
-  insertSheet: (n) => { feuilles[n] = plats; return plats; },
+  insertSheet: (n) => { feuilles[n] = n === "Plats" ? plats : aide; return feuilles[n]; },
 });
 ctx.SpreadsheetApp.getUi = () => ({ alert: (t) => { alerte = t; } });
 const regle = () => {
@@ -77,7 +88,7 @@ ctx.SpreadsheetApp.newConditionalFormatRule = regle;
 let memo = null;
 ctx.PropertiesService.getDocumentProperties = () => ({ getProperty: () => memo, setProperty: (_k, v) => { memo = v; } });
 vm.createContext(ctx);
-for (const f of ["Snack.js", "Carte.js", "Boissons.js", "CarteAppli.js", "PartVendeur.js", "JournalSnack.js", "Envoi.js", "MiseEnForme.js"]) {
+for (const f of ["Snack.js", "Carte.js", "Boissons.js", "CarteAppli.js", "PartVendeur.js", "JournalSnack.js", "Envoi.js", "MiseEnForme.js", "Aide.js"]) {
   vm.runInContext(fs.readFileSync(path.join(SCRIPT, f), "utf8"), ctx, { filename: f });
 }
 vm.runInContext("mettreEnForme()", ctx);
@@ -110,6 +121,13 @@ verifier(alerte.includes("Revenu"), "message de fin : lignes retirées", alerte)
 // 3. Relancer : l'onglet est réécrit, pas doublé.
 vm.runInContext("mettreEnForme()", ctx);
 verifier(pg[1][0] === "PaniniKefta" && pg.length === 6 && pg.filter((l) => l[0] === "PaniniKefta").length === 1, "relancé : mêmes lignes, rien en trop", pg.map((l) => l[0]).join(" | "));
+
+// 4. Modes d'emploi : notes A1, Journal annoncé en lecture, onglet « Mode d'emploi ».
+verifier(/À QUOI ÇA SERT/.test(fItems.notes.A1 || "") && /LECTURE SEULE/.test(plats.notes.A1 || "") && /LECTURE SEULE/.test(fJournal.notes.A1 || ""),
+  "note de mode d'emploi en A1 des onglets", Object.keys(fJournal.notes).join(","));
+verifier(/^Calculé/.test(fJournal.notes.H1 || "") && /^Envoyé/.test(fJournal.notes.M1 || ""), "Journal : chaque colonne dit d'où elle vient", fJournal.notes.H1);
+verifier(fJournal.protections.length === 1 && fJournal.protections[0].avertir, "Journal : une seule protection d'avertissement après deux passages", fJournal.protections.length);
+verifier(aide.g[0][0] === "Mode d'emploi" && aide.g.some((l) => l[0] === "Ajouter un plat"), "onglet « Mode d'emploi » écrit", aide.g.map((l) => l[0]).join(" | "));
 
 console.log(echecs ? `\n${echecs} échec(s)` : "\nTout est bon.");
 process.exit(echecs ? 1 : 0);

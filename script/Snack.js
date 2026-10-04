@@ -40,6 +40,7 @@ function onOpen() {
     .createMenu('Snack')
     .addItem('Mettre à jour les calculs', 'mettreAJour')
     .addItem('Mettre en forme la fiche', 'mettreEnForme')
+    .addItem("Poser les modes d'emploi", 'poserModesDEmploi')
     .addSeparator()
     .addItem('Ajouter un ingrédient', 'ajouterIngredient')
     .addItem('Ajouter un produit', 'ajouterProduit')

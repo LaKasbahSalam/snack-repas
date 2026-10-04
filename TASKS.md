@@ -6,7 +6,7 @@
 
 ## En cours
 - [ ] **Nouvelle carte (v4, 04/10/2026)** à reporter dans le classeur :
-  1. Karim : menu Snack → « Mettre en forme la fiche » (script poussé le 04/10/2026), puis vérifier « Items & Sandwichs » et le nouvel onglet « Plats ».
+  1. Karim : recharger le classeur, menu Snack → « Mettre en forme la fiche » (script poussé le 04/10/2026), puis vérifier « Items & Sandwichs », « Plats », « Mode d'emploi » et les notes du Journal Snack.
   2. Prix à taper : jus d'orange 15 (Boissons, C), frites & nuggets 30, sandwich avocat, œuf, tomate 35 (« Prix de vente » d'Items & Sandwichs) ; puis « Envoyer les prix à l'appli ».
   3. Paninis petit 30 / grand 50 : quantités à voir avec l'équipe ; ensuite une colonne par grand panini et un code `…_grand` par article dans « Carte appli » (ne jamais changer un code existant).
   4. Omelette au zaalouk (30) : recette et prix des ingrédients à fournir.
@@ -15,7 +15,7 @@
   1. ~~Migration `20260927110000_snack_prime_au_classeur.sql`~~ : exécutée par Karim dans la base de l'appli le 27/09/2026, KasbahCalendar poussé.
   2. Menu Snack → « Envoyer les prix à l'appli » : vérifier la ligne « Part vendeur » sous le bloc de « Items & Sandwichs » (80 %), la colonne « Part vendeur » de « Boissons » (bière 0 %), et les colonnes « Coût revient » / « Part vendeur » de « Carte appli » (recherches par le nom ; case vide = nom introuvable, à corriger en colonne C).
   3. Régler les % voulus ; vérifier sur les ventes arrivées que H et I se calculent (une bière : H = 0).
-  4. Renommer H1 « pour le vendeur » et I1 « pour l'hôtel » dans le Journal Snack (inversés à la main : H est la part du vendeur).
+  4. ~~Renommer H1 et I1 du Journal Snack~~ : fait en ligne (« Pour le vendeur », « pour l'hotel »), constaté le 04/10/2026.
   5. Supprimer la colonne H « Retenue » de « Carte appli » (plus lue) ; les colonnes de renvoi se recalent d'elles-mêmes au prochain envoi.
 - [ ] **Journal Snack : réparer H22:H25 à la main** (`#ERROR!`, anciennes lignes) : en H22 `=(K22>0)*ARRONDI(100*K22*(1-L22))/100`, puis tirer jusqu'à H25 ; I suit d'elle-même — *27/09/2026*
 - [ ] **À trancher par Karim** : les bières vendues du 25 au 26/09 ont donné une prime dans l'appli (91,20 et 45,60 à Ayoub, au moins) ; la reprendre ou non
@@ -25,6 +25,7 @@
 - [ ] Proposer les boissons à l'équipe à 6 DH : onglet « Boissons », sélectionner les lignes, menu Snack → « Ajouter à la page Snack de l'équipe » (le script pose le code et le prix équipe)
 
 ## Fait
+- [x] Modes d'emploi dans le classeur : menu « Poser les modes d'emploi » (aussi lancé par « Mettre en forme la fiche », `Aide.js`). Onglet « Mode d'emploi » en premier (principe, chemin d'une vente, rôle de chaque onglet, ajouter un plat, changer un prix) ; note en A1 de chaque onglet (à quoi ça sert, comment s'en servir) ; Journal Snack : note par colonne (envoyée par l'appli ou calculée), en-têtes calculés gris, protection d'avertissement sur l'onglet. Des notes plutôt qu'une ligne en haut : les onglets sont lus par position. Script poussé au classeur (comparé avant) — 04/10/2026
 - [x] « Carte appli » : colonnes « Coût revient » et « Part vendeur » grisées, avec une note « Calculé, ne pas taper ici » sur l'en-tête et une protection d'avertissement (Sheets demande confirmation avant une saisie). Elles se règlent dans « Items & Sandwichs » et « Boissons ». Reposé à chaque envoi des prix (`marquerLecture_`, test dans `parts.test.js`). Script poussé au classeur (comparé avant) — 04/10/2026
 - [x] Fiche repas plus lisible : menu « Mettre en forme la fiche » (`MiseEnForme.js`). Il retire les lignes vides ou en double sous le bloc (Revenu, Benefice, Part Vendeur, Part Hotel si vides), colore les quantités utilisées et efface les zéros, fige les noms de plats et les colonnes A à E, et crée l'onglet « Plats » (un plat ou une boisson par ligne : ingrédients en clair, coût, prix, marge, % coût en rouge ou vert, prix conseillé, part vendeur ; triable avec un filtre, tout en recherches par le nom). Test `mise-en-forme.test.js`. Script poussé au classeur (comparé avant : aucune modification en ligne) — 04/10/2026
 - [x] Page de ventes du snack dans l'appli : onglet « Journal » de la page Snack, livré dans KasbahCalendar (commit 4b7ef23) — tâche fermée le 29/09/2026
