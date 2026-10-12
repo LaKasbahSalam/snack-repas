@@ -33,7 +33,9 @@ function aides_() {
   [FEUILLE_JOURNAL_SNACK, 'Les ventes du snack faites dans l\'appli, une ligne par article, et la prime de chaque vente.',
     'LECTURE SEULE : les ventes arrivent à chaque « Envoyer les prix à l\'appli » et chaque soir. Les calculs (en-têtes gris) suivent la fiche : changer un coût ou une part change aussi les ventes passées. Une vente fausse se corrige dans l\'appli.'],
   ['Journal Repas', 'Les repas de groupe : dépenses, recette, nombre de personnes, qui encaisse.',
-    'On SAISIT ici, une ligne par repas. « Revenu net » se calcule.'],
+    'On SAISIT ici, une ligne par repas. « Revenu net » se calcule. Le bilan par mois est dans « Repas / Mois ».'],
+  ['Repas / Mois', 'Le bilan des repas de groupe, mois par mois : par plat, repas, personnes, recette, dépenses, revenu net, et une phrase de bilan.',
+    'LECTURE SEULE : tout se recalcule depuis « Journal Repas ». Nouveau mois ou nouveau plat : Snack → « Repas par mois » (la ligne 2 le signale en rouge).'],
   ];
 }
 

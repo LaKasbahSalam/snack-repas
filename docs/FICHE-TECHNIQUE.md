@@ -121,6 +121,8 @@ document — y compris ce que vous vouliez garder.
 | **Boissons** | Une boisson par ligne : prix d'achat, prix de vente, code et prix équipe | Vous + le menu Snack |
 | **Carte appli** | Ce que l'équipe vend aux clients : rubrique, article, code, et en renvoi le coût de revient et la part du vendeur | Vous + le menu Snack |
 | **Journal Snack** | Une ligne par article vendu dans l'appli (depuis le 27/09/2026), avec le partage vendeur / hôtel en formules | Le script, uniquement en bas |
+| **Journal Repas** | Les repas de groupe, une ligne par repas : dépenses, recette, personnes, qui encaisse | Vous |
+| **Repas / Mois** | Le bilan des repas de groupe par mois et par plat, et une phrase de bilan, en formules sur « Journal Repas » | Le menu « Repas par mois » |
 
 ## Le produit et l'article : la ligne de partage
 
@@ -188,6 +190,11 @@ que le coût manque ; le Journal Snack se corrige seul quand il arrive.
 - **Ce qu'il fait** : recalcule le bloc sous les ingrédients — coût de revient, marge, coût/prix, prix conseillé — en suivant le nombre réel d'ingrédients et de produits.
 - **Ce qu'il ne touche pas** : vos prix de vente et votre objectif de coût. Ils sont mémorisés dans le fichier, pour survivre à une ligne cassée.
 - **Quand** : après avoir ajouté des lignes ou des colonnes à la main.
+
+### Repas par mois
+- **Ce qu'il fait** : écrit l'onglet « Repas / Mois » — un bloc par mois (le plus récent en haut), une ligne par plat servi ce mois-là (repas, personnes, recette, dépenses + dépenses extras, revenu net, par personne), un total et une phrase de bilan (plat le plus rentable, plats à perte). Les chiffres sont des formules sur « Journal Repas » : une correction du journal se voit tout de suite.
+- **Ce qu'il ne touche pas** : « Journal Repas ». Il refuse d'écrire dans un onglet « Repas / Mois » rempli à la main (A1 ≠ « Repas par mois »).
+- **Quand** : au premier repas d'un nouveau mois, ou d'un nouveau plat. La ligne 2 de l'onglet le signale en rouge (repas du journal comptés nulle part). « tajine » et « Tajine » sont un seul plat ; « Tajine kefta » en est un autre.
 
 ### Ajouter un ingrédient
 - Insère une ligne sous le dernier ingrédient, met 0 dans toutes les recettes, recalcule, place le curseur sur le nom.

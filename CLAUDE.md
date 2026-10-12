@@ -44,6 +44,7 @@ node tests/journal.test.js    # ce que tirerVentesSnack_() écrit dans le journa
 node tests/envoi.test.js      # les boissons proposées à l'équipe, et ce qui les bloque
 node tests/parts.test.js      # la part du vendeur réglable par article, et les renvois de Carte appli
 node tests/mise-en-forme.test.js  # le ménage de la fiche et l'onglet Plats
+node tests/repas-mois.test.js     # l'onglet Repas / Mois, lu dans Journal Repas
 ```
 
 `tests/faux-sheets.js` est un faux Google Sheets : une grille de valeurs et

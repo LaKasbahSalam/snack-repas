@@ -41,6 +41,7 @@ function onOpen() {
     .addItem('Mettre à jour les calculs', 'mettreAJour')
     .addItem('Mettre en forme la fiche', 'mettreEnForme')
     .addItem("Poser les modes d'emploi", 'poserModesDEmploi')
+    .addItem('Repas par mois', 'construireRepasMois')
     .addSeparator()
     .addItem('Ajouter un ingrédient', 'ajouterIngredient')
     .addItem('Ajouter un produit', 'ajouterProduit')
