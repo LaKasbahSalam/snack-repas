@@ -52,6 +52,7 @@ function onOpen() {
     .addSeparator()
     .addItem("Ajouter à la page Snack de l'équipe", 'ajouterALaPageSnack')
     .addItem("Créer l'onglet Carte appli", 'creerCarteAppli')
+    .addItem("Aligner les prix sur l'affiche", 'alignerPrixAffiche')
     .addItem("Envoyer les prix à l'appli", 'envoyerPrixAppli')
     .addItem("Configurer l'envoi à l'appli", 'configurerEnvoi')
     .addItem("Programmer l'envoi chaque soir", 'programmerEnvoiSoir')

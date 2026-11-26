@@ -45,6 +45,7 @@ node tests/envoi.test.js      # les boissons proposées à l'équipe, et ce qui 
 node tests/parts.test.js      # la part du vendeur réglable par article, et les renvois de Carte appli
 node tests/mise-en-forme.test.js  # le ménage de la fiche et l'onglet Plats
 node tests/repas-mois.test.js     # l'onglet Repas / Mois, lu dans Journal Repas
+node tests/prix-affiche.test.js   # le menu « Aligner les prix sur l'affiche »
 ```
 
 `tests/faux-sheets.js` est un faux Google Sheets : une grille de valeurs et

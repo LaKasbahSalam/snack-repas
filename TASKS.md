@@ -7,12 +7,14 @@
 ## En cours
 - [ ] **Repas / Mois** : Karim, recharger le classeur puis menu Snack → « Repas par mois » (première fois : autoriser le script) ; vérifier les trois mois — *12/10/2026*
 - [ ] **Journal Repas, tajine du 06/10** : le journal dit 4 personnes à 60 = 240 DH ; les fiches clients de l'appli portent 4 tajines pour 270 DH (trois à 70, un à 60), plus un 5e douteux (résa 94085703, départ le 06/10, tajine saisi le soir). Trancher le prix et corriger la ligne — *12/10/2026*
-- [ ] **Nouvelle carte (v4, 04/10/2026)** à reporter dans le classeur :
-  1. Karim : recharger le classeur, menu Snack → « Mettre en forme la fiche » (script poussé le 04/10/2026), puis vérifier « Items & Sandwichs », « Plats », « Mode d'emploi » et les notes du Journal Snack.
-  2. Prix à taper : jus d'orange 15 (Boissons, C), frites & nuggets 30, sandwich avocat, œuf, tomate 35 (« Prix de vente » d'Items & Sandwichs) ; puis « Envoyer les prix à l'appli ».
-  3. Paninis petit 30 / grand 50 : quantités à voir avec l'équipe ; ensuite une colonne par grand panini et un code `…_grand` par article dans « Carte appli » (ne jamais changer un code existant).
-  4. Omelette au zaalouk (30) : recette et prix des ingrédients à fournir.
-  5. À trancher : burgers, bière et Poms, absents de la carte imprimée : retirés de l'appli ou gardés ?
+- [ ] **Omelette au zaalouk (30 DH, affiche v7) à créer** — seul article de l'affiche absent de l'appli :
+  1. Ingrédients manquants dans « Items & Sandwichs » : aubergine, ail (menu « Ajouter un ingrédient », quantité achetée et prix payé). Œufs, tomate, huile d'olive, épices, pain y sont déjà.
+  2. Menu « Ajouter un produit » : quantités de chaque ingrédient, « Prix de vente » 30, « Part vendeur ».
+  3. « Carte appli » : une ligne (rubrique, article, nom exact du produit en C, code `omelette_zaalouk` à ne plus changer), puis « Envoyer les prix à l'appli ».
+  4. Dans `PrixAffiche.js`, passer l'omelette de `AFFICHE_SANS_PRODUIT` à `PRIX_AFFICHE`, et pousser.
+- [ ] À trancher, d'après l'affiche v7 : burger, burger chameau, bière et Poms, absents de l'affiche mais toujours vendus dans l'appli ; page Snacks du site (Design) encore à l'ancien prix (paninis 30/50, tajines 60/70) ; tajines sur commande (poulet-légumes 70/pers., végétarien 50/pers.) absents de la fiche
+- [ ] Karim : recharger le classeur, menu Snack → « Mettre en forme la fiche », puis vérifier « Items & Sandwichs », « Plats », « Mode d'emploi » et les notes du Journal Snack (reste de la carte v4, 04/10/2026)
+- [ ] **Ranger les prix** : la Fiche repas fait foi. Contrôle des écarts entre fiche, affiche et appli (colonne « Prix carte imprimée » dans « Carte appli »), envoi du soir qui signale ses échecs, retirer les prix écrits en dur dans `Carte.js` (septembre, périmés)
 - [ ] **Prime calculée dans le classeur : mise en service** — script poussé au classeur et base migrée le 27/09/2026. Reste :
   1. ~~Migration `20260927110000_snack_prime_au_classeur.sql`~~ : exécutée par Karim dans la base de l'appli le 27/09/2026, KasbahCalendar poussé.
   2. Menu Snack → « Envoyer les prix à l'appli » : vérifier la ligne « Part vendeur » sous le bloc de « Items & Sandwichs » (80 %), la colonne « Part vendeur » de « Boissons » (bière 0 %), et les colonnes « Coût revient » / « Part vendeur » de « Carte appli » (recherches par le nom ; case vide = nom introuvable, à corriger en colonne C).
@@ -27,6 +29,8 @@
 - [ ] Proposer les boissons à l'équipe à 6 DH : onglet « Boissons », sélectionner les lignes, menu Snack → « Ajouter à la page Snack de l'équipe » (le script pose le code et le prix équipe)
 
 ## Fait
+- [x] Appli alignée sur l'affiche v7 : Karim a lancé « Aligner les prix sur l'affiche » et envoyé à l'appli. Vérifié dans « Carte appli », colonne G : frites & nuggets 30, les quatre paninis 35 (panini chameau compris : 1,71 DH de marge pour un coût de 33,29), tajine chameau 45, jus d'orange 15 — 26/11/2026
+- [x] Menu « Aligner les prix sur l'affiche » (`PrixAffiche.js`) : prix de l'affiche v7 écrits dans le script, il montre les changements (marge sous 5 DH signalée), écrit seulement sur accord (ligne « Prix de vente » d'Items & Sandwichs, colonne C de Boissons), laisse les produits hors affiche, puis propose l'envoi à l'appli. Sur le classeur du 26/11 : 7 prix (frites & nuggets 30, quatre paninis 35, tajine chameau 45, jus d'orange 15). Test `prix-affiche.test.js`. Script poussé au classeur (comparé avant et après) — 26/11/2026
 - [x] Onglet « Repas / Mois » : menu Snack → « Repas par mois » (`RepasMois.js`). Un bloc par mois, une ligne par plat (repas, personnes, recette, dépenses, revenu net, par personne), total et phrase de bilan, tout en formules sur « Journal Repas » (colonnes retrouvées par l'en-tête). Ligne 2 en rouge si un repas du journal n'est compté nulle part (nouveau mois ou plat : relancer). Test `repas-mois.test.js`. Script poussé au classeur (comparé avant : aucune modification en ligne) — 12/10/2026
 - [x] Modes d'emploi dans le classeur : menu « Poser les modes d'emploi » (aussi lancé par « Mettre en forme la fiche », `Aide.js`). Onglet « Mode d'emploi » en premier (principe, chemin d'une vente, rôle de chaque onglet, ajouter un plat, changer un prix) ; note en A1 de chaque onglet (à quoi ça sert, comment s'en servir) ; Journal Snack : note par colonne (envoyée par l'appli ou calculée), en-têtes calculés gris, protection d'avertissement sur l'onglet. Des notes plutôt qu'une ligne en haut : les onglets sont lus par position. Script poussé au classeur (comparé avant) — 04/10/2026
 - [x] « Carte appli » : colonnes « Coût revient » et « Part vendeur » grisées, avec une note « Calculé, ne pas taper ici » sur l'en-tête et une protection d'avertissement (Sheets demande confirmation avant une saisie). Elles se règlent dans « Items & Sandwichs » et « Boissons ». Reposé à chaque envoi des prix (`marquerLecture_`, test dans `parts.test.js`). Script poussé au classeur (comparé avant) — 04/10/2026
