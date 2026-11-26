@@ -13,8 +13,8 @@
  *   - « Boissons », colonne C (Prix de vente).
  * Rien d'autre : ni recette, ni coût, ni « Carte appli ». Un produit de la
  * fiche absent de l'affiche (burger, bière…) garde son prix ; un article de
- * l'affiche absent de la fiche (omelette au zaalouk…) est seulement
- * signalé : il faut d'abord créer le produit et sa recette.
+ * l'affiche absent de la fiche est seulement signalé : il faut d'abord
+ * créer le produit (« Ajouter un produit »).
  *
  * Rien n'est écrit avant que la liste des changements ait été montrée et
  * acceptée. Ensuite, le menu propose d'envoyer tout de suite à l'appli.
@@ -26,6 +26,7 @@
 const PRIX_AFFICHE = [
   // Club sandwich
   ['Sandwich', 35],                 // Avocado, egg & tomato
+  ['Omelette zaalouk', 30],         // coût au forfait (ingrédient « Omelette zaalouk (forfait) »)
   // Paninis : une seule taille, 35 ; +10 avec frites
   ['PaniniKefta', 35],
   ['P.NugDinde', 35],
@@ -48,7 +49,7 @@ const PRIX_AFFICHE = [
 ];
 
 // Sur l'affiche, mais sans produit dans la fiche : seulement signalés.
-const AFFICHE_SANS_PRODUIT = ['Omelette au zaalouk (30)'];
+const AFFICHE_SANS_PRODUIT = [];
 
 // Sous cette marge (prix de vente - coût de revient, en DH), le changement
 // est signalé : la prime du vendeur et la part de l'hôtel deviennent minces.
