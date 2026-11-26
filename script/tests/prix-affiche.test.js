@@ -77,7 +77,7 @@ console.log("1. Refus : la liste est montrée, rien n'est écrit");
   verifier(/P\.Chameau : 50 -> 35 DH +ATTENTION/.test(m), "panini chameau signalé : marge sous 5 DH", m);
   verifier(!/PaniniKefta[^\n]*ATTENTION/.test(m), "panini kefta non signalé (marge 15 DH)", m);
   verifier(m.includes("Burger") && m.includes("Bière") && /Pas sur l'affiche/.test(m), "burger et bière : hors affiche, laissés", m);
-  verifier(/introuvable[^\n]*Omelette zaalouk/.test(m), "omelette zaalouk absente de la fiche : à créer", m);
+  verifier(/introuvable[^\n]*Sandwich zaalouk/.test(m), "sandwich zaalouk absente de la fiche : à créer", m);
   verifier(m.includes("P.NugDinde") && /introuvable/.test(m), "produit de l'affiche absent de la fiche signalé", m);
   verifier(JSON.stringify(prixItems(f)) === "[20,35,40,40,50,40]", "Items & Sandwichs intact", prixItems(f));
   verifier(f.boissons.g[1][2] === 10, "Boissons intact", f.boissons.g[1][2]);
@@ -108,10 +108,10 @@ console.log("3. Accord avec envoi, puis second passage : plus rien à changer");
 console.log("3b. Omelette créée au forfait, prix encore vide : proposée à 30");
 {
   const f = classeur();
-  f.items.g[1][11] = "Omelette zaalouk";
+  f.items.g[1][11] = "Sandwich zaalouk";
   f.items.g[7][11] = 8;
   const { fenetres } = lancer(f, ["OUI", "NON"]);
-  verifier(fenetres[0].message.includes("Omelette zaalouk : vide -> 30 DH"), "prix vide -> 30", fenetres[0].message);
+  verifier(fenetres[0].message.includes("Sandwich zaalouk : vide -> 30 DH"), "prix vide -> 30", fenetres[0].message);
   verifier(f.items.g[8][11] === 30, "30 écrit sous l'omelette", f.items.g[8][11]);
 }
 

@@ -7,11 +7,11 @@
 ## En cours
 - [ ] **Repas / Mois** : Karim, recharger le classeur puis menu Snack → « Repas par mois » (première fois : autoriser le script) ; vérifier les trois mois — *12/10/2026*
 - [ ] **Journal Repas, tajine du 06/10** : le journal dit 4 personnes à 60 = 240 DH ; les fiches clients de l'appli portent 4 tajines pour 270 DH (trois à 70, un à 60), plus un 5e douteux (résa 94085703, départ le 06/10, tajine saisi le soir). Trancher le prix et corriger la ligne — *12/10/2026*
-- [ ] **Omelette au zaalouk (30 DH, affiche v7) à mettre en vente, coût au forfait** (décision Karim, 26/11/2026 : pas de recette détaillée, un coût approché ; estimation ~8 DH = 2 œufs 3, aubergine ~2, demi-tomate 1, pain 1, huile-ail-épices ~1). Le script la connaît déjà (`PrixAffiche.js`, poussé). Karim, dans le classeur :
-  1. Snack → « Ajouter un ingrédient » : nom `Omelette zaalouk (forfait)`, quantité achetée 1, prix 8.
-  2. Snack → « Ajouter un produit » : nom `Omelette zaalouk`, 1 dans la case du forfait, « Part vendeur » 80 %.
+- [ ] **Sandwich zaalouk (30 DH ; « Zaalouk omelet » sur l'affiche v7) à mettre en vente, coût au forfait** (décision Karim, 26/11/2026 : pas de recette détaillée, un coût approché ; estimation ~8 DH = 2 œufs 3, aubergine ~2, demi-tomate 1, pain 1, huile-ail-épices ~1). Le script le connaît déjà (`PrixAffiche.js`, poussé). Karim, dans le classeur :
+  1. Snack → « Ajouter un ingrédient » : nom `Sandwich zaalouk (forfait)`, quantité achetée 1, prix 8.
+  2. Snack → « Ajouter un produit » : nom `Sandwich zaalouk`, 1 dans la case du forfait, « Part vendeur » 80 %.
   3. Snack → « Aligner les prix sur l'affiche » : il pose le prix de vente à 30. Répondre Non à l'envoi.
-  4. « Carte appli », nouvelle ligne : rubrique `Sandwich`, article `Omelette au zaalouk`, produit `Omelette zaalouk`, sauce et frites non cochées, code `omelette_zaalouk` (à ne plus changer) ; puis « Envoyer les prix à l'appli » et vérifier la colonne G.
+  4. « Carte appli », nouvelle ligne : rubrique `Sandwich`, article `Sandwich zaalouk`, produit `Sandwich zaalouk`, sauce et frites non cochées, code `sandwich_zaalouk` (à ne plus changer) ; puis « Envoyer les prix à l'appli » et vérifier la colonne G.
 - [ ] À trancher, d'après l'affiche v7 : burger, burger chameau, bière et Poms, absents de l'affiche mais toujours vendus dans l'appli ; page Snacks du site (Design) encore à l'ancien prix (paninis 30/50, tajines 60/70) ; tajines sur commande (poulet-légumes 70/pers., végétarien 50/pers.) absents de la fiche
 - [ ] Karim : recharger le classeur, menu Snack → « Mettre en forme la fiche », puis vérifier « Items & Sandwichs », « Plats », « Mode d'emploi » et les notes du Journal Snack (reste de la carte v4, 04/10/2026)
 - [ ] **Ranger les prix** : la Fiche repas fait foi. Contrôle des écarts entre fiche, affiche et appli (colonne « Prix carte imprimée » dans « Carte appli »), envoi du soir qui signale ses échecs, retirer les prix écrits en dur dans `Carte.js` (septembre, périmés)

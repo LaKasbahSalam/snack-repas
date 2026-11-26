@@ -26,7 +26,7 @@
 const PRIX_AFFICHE = [
   // Club sandwich
   ['Sandwich', 35],                 // Avocado, egg & tomato
-  ['Omelette zaalouk', 30],         // coût au forfait (ingrédient « Omelette zaalouk (forfait) »)
+  ['Sandwich zaalouk', 30],         // coût au forfait (ingrédient « Sandwich zaalouk (forfait) »)
   // Paninis : une seule taille, 35 ; +10 avec frites
   ['PaniniKefta', 35],
   ['P.NugDinde', 35],
